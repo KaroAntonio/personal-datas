@@ -1,0 +1,55 @@
+body,html { margin: 0px; border: 0px; }
+
+#loading {
+  position: absolute;
+  right: 50vw;
+  top: 20vh;
+  width: 40px;
+  height: 40px;
+  z-index: 1000000; /* the highest */
+}
+
+#prompt {
+  position: fixed; 
+  width: 100vw;
+  font-size: 50px;
+  padding-top: 10px;
+  text-align: center;
+}
+
+#next-button {
+  position: fixed;
+  width: 200px;
+  right: 0px;
+  bottom: 0px;
+  padding-bottom: 10px;
+  padding-right: 10px;
+  text-align: right;
+  z-index: 20;
+
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+#next-button:hover {
+  cursor: pointer;
+}
+
+#question-counter {
+}
+
+#counter-label {
+  float: right;
+  display: inline-block;
+}
+
+#confirm {
+  font-size: 50px;
+}
+
+
+
