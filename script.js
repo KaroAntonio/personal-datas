@@ -3,12 +3,16 @@ var H = window.innerHeight;
 
 var isMouseDown = false;
 
+var lineStyle = 'solid'
+
 var drawings = [
 ]
 
 var prompts = [
   ['WHO ARE YOU','red'],
   ['WHERE DO U COME FROM','yellow'],
+  ['WHO DO YOU FOLLOW','orange'],
+  ['ARE YOU SATISFIED WITH YOUR BODY','pink'],
   ['WHAT SEX ARE YOU','black']
 ]
 
@@ -43,10 +47,9 @@ function setup () {
 
 function draw () {
   if (isMouseDown && promptIndex >= 0) {
-    fill('black')
     var drawing = drawings[drawings.length-1]
     drawing.lines[drawing.lines.length-1].points.push([mouseX, mouseY])
-    ellipse(mouseX, mouseY, 10, 10)
+    drawLine( drawing.lines[drawing.lines.length-1], style=lineStyle )
   }
 }
 
@@ -75,14 +78,34 @@ function nextPrompt () {
   }
 }
 
+function drawLine ( lineData , style='points') {
+  if (style=='points') drawPointsLine(lineData)
+  if (style=='solid') drawSolidLine(lineData)
+}
+
+function drawPointsLine( lineData ) {
+  fill(line.color)
+  lineData.points.forEach((pt) => {
+    ellipse(pt[0], pt[1], 10, 10)
+  })
+}
+
+function drawSolidLine( lineData ) {
+  fill(lineData.color)
+  stroke(lineData.color)
+  strokeWeight(5)
+  for ( var i = 0; i < lineData.points.length-1; i++) {
+    var p1 = lineData.points[i]
+    var p2 = lineData.points[i+1]
+    line(p1[0], p1[1], p2[0], p2[1]) 
+  }
+}
+
 function composeDrawings() {
   background('white')
   drawings.forEach(function(drawing) {
     drawing.lines.forEach(function(line) {
-      fill(line.color)
-      line.points.forEach((pt) => {
-        ellipse(pt[0], pt[1], 10, 10)
-      })
+      drawLine( line, style=lineStyle )
     }) 
   })
 }
