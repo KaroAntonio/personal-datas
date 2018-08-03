@@ -5,10 +5,14 @@ var isMouseDown = false;
 
 var lineStyle = 'solid'
 
-var drawings = [
-]
+var drawings = []
+
+var colors = {
+  'GENDER':null
+}
 
 var prompts = [
+  ['CHOOSE YOUR GENDER','GENDER'],
   ['WHO ARE YOU','red'],
   ['WHERE DO U COME FROM','yellow'],
   ['WHO DO YOU FOLLOW','orange'],
@@ -46,11 +50,23 @@ function setup () {
 }
 
 function draw () {
-  if (isMouseDown && promptIndex >= 0) {
+  if (prompts[promptIndex][1] == 'GENDER'){
+    background(encodeColor(mouseX,mouseY))
+    if (isMouseDown) {
+      fill(encodeColor(mouseX,mouseY))
+      colors['GENDER'] = encodeColor(mouseX, mouseY)
+    }
+    rect(W/2-50, H/2-50, 100, 100); 
+  } else if (isMouseDown && promptIndex >= 0) {
     var drawing = drawings[drawings.length-1]
     drawing.lines[drawing.lines.length-1].points.push([mouseX, mouseY])
     drawLine( drawing.lines[drawing.lines.length-1], style=lineStyle )
   }
+  
+}
+
+function encodeColor( x,y ) {
+    return color(x, y, 255)
 }
 
 function setupPrompt () {  
@@ -59,9 +75,28 @@ function setupPrompt () {
   $('#question-counter').html((promptIndex).toString())
   background('white')
 
+  if (prompts[promptIndex][1] == 'GENDER') {
+    colorMode(HSB, W, H, 255);
+    setupColorPicker()
+  }
+
   drawings.push({
     'lines':[]
   })
+}
+
+function setupColorPicker() {
+  var width = 200 
+  var height = 200 
+  var x_offset = W/2- width/2
+  var x_offset = H/2- height/2
+  for ( var x=0; x<width; x++ ) {
+    for ( var y=0; y<height; y++) {
+      stroke((x+y)%255)
+      //console.log(x,y,(x+y)%255)
+      point(x,y)
+    }
+  }
 }
 
 function nextPrompt () {
