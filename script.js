@@ -1,23 +1,26 @@
 var W = window.innerWidth;
 var H = window.innerHeight;
-
 var isMouseDown = false;
+
+var randomSeedVal = Math.random()*100
+
+var Y_AXIS = 1;
+var X_AXIS = 2;
 
 var lineStyle = 'solid'
 
-var drawings = []
-
-var colors = {
-  'GENDER':null
-}
-
+// responses are inserted after prompts
+// [prompt, type, opts, response]
 var prompts = [
-  ['CHOOSE YOUR GENDER','GENDER'],
-  ['WHO ARE YOU','red'],
-  ['WHERE DO U COME FROM','yellow'],
-  ['WHO DO YOU FOLLOW','orange'],
-  ['ARE YOU SATISFIED WITH YOUR BODY','pink'],
-  ['WHAT SEX ARE YOU','black']
+  initPrompt('CHOOSE YOUR GENDER','color',[]),
+  initPrompt('CHOOSE YOUR RACE','color',[]),
+  initPrompt('HOW LONG HAVE YOU LIVED?','scale',['Just a hot second','I run with Dinosaurs']),
+  initPrompt('HOW POPULATION DENSE WAS YOUR YOUR BIRTHPLACE?','scale',['It was just me','I lived in the same room as everyone I ever met']),
+  //initPrompt('HOW MUCH FAMILY WAS AROUND YOU GROWING UP?','scale',['It was just me','I lived in the same room as everyone I ever met']),
+  //initPrompt('WHERE DO U COME FROM','line',['yellow']),
+  initPrompt('DRAW A FAVOURITE CHILDHOOD TOOL','line',['black'])
+  //initPrompt('ARE YOU SATISFIED WITH YOUR BODY','line',['pink']),
+  //initPrompt('WHAT SEX ARE YOU','line',['black'])
 ]
 
 // prompts are in reverse, deal with it
@@ -36,8 +39,24 @@ function setup () {
 
   ctx.mousePressed(() => { 
     isMouseDown = true;
-    console.log(drawings)
-    drawings[drawings.length-1].lines.push({'points':[],'color':prompts[promptIndex][1]})
+    if (prompts[promptIndex]) {
+      if (prompts[promptIndex].type == 'line') 
+        addNewLineToCurrentResponse()
+      if (prompts[promptIndex].type =='color'){
+        if (isMouseDown) {
+          prompts[promptIndex].response = encodeColor(mouseX, mouseY)
+        }
+        noStroke()
+      }
+      if (prompts[promptIndex].type =='scale'){
+        var val = constrain(mouseX, 50, width-50)
+        $('#scale-slider').css({
+          'left': val
+        })
+        prompts[promptIndex].response = val/(width-50*2)
+        compose()
+      }
+    }
   })
   ctx.mouseReleased(() => { isMouseDown = false;})
 
@@ -50,39 +69,62 @@ function setup () {
 }
 
 function draw () {
-  if (prompts[promptIndex][1] == 'GENDER'){
-    background(encodeColor(mouseX,mouseY))
-    if (isMouseDown) {
-      fill(encodeColor(mouseX,mouseY))
-      colors['GENDER'] = encodeColor(mouseX, mouseY)
+  if (prompts[promptIndex]) {
+    if (prompts[promptIndex].type == 'color'){
+        background(encodeColor(mouseX,mouseY))
+        compose()
+        fill(encodeColor(mouseX,mouseY))
+        noStroke()
+        rect(width/2-50,height/2-50, 100,100)
+    } else if (prompts[promptIndex].type == 'line' && isMouseDown && promptIndex >= 0) {
+      var lines = prompts[promptIndex].response
+      var line = lines[lines.length-1]
+      line.points.push([mouseX, mouseY])
+      drawLine( line, style=lineStyle )
+    } else {
     }
-    rect(W/2-50, H/2-50, 100, 100); 
-  } else if (isMouseDown && promptIndex >= 0) {
-    var drawing = drawings[drawings.length-1]
-    drawing.lines[drawing.lines.length-1].points.push([mouseX, mouseY])
-    drawLine( drawing.lines[drawing.lines.length-1], style=lineStyle )
   }
-  
+}
+
+function addNewLineToCurrentResponse() {
+  var lines = prompts[promptIndex].response 
+  var color = prompts[promptIndex].opts[0]
+  lines.push({'points':[],'color':color})
 }
 
 function encodeColor( x,y ) {
     return color(x, y, 255)
 }
 
+function initPrompt(prompt_str, type, opts) {
+  return {
+    'prompt': prompt_str,
+    'type': type,
+    'opts': opts,
+    'response': null
+  }
+}
+
 function setupPrompt () {  
-  console.log(promptIndex)
-  $('#prompt').html(prompts[promptIndex][0])
+  $('#scale').hide()
+  $('#prompt').html(prompts[promptIndex].prompt)
   $('#question-counter').html((promptIndex).toString())
   background('white')
 
-  if (prompts[promptIndex][1] == 'GENDER') {
+  if (prompts[promptIndex].type == 'color') {
     colorMode(HSB, W, H, 255);
-    setupColorPicker()
+    //setupColorPicker()
   }
+  else if (prompts[promptIndex].type == 'scale') {
+    $('#scale').show()
+    setupScale()
+  }
+  else if (prompts[promptIndex].type == 'line') {
+    lines = prompts[promptIndex].response 
+    if (!lines) prompts[promptIndex].response = []
+  }
+  compose()
 
-  drawings.push({
-    'lines':[]
-  })
 }
 
 function setupColorPicker() {
@@ -109,7 +151,7 @@ function nextPrompt () {
     console.log('END')
     $('#next-button').remove()
     $('#prompt').html('BEHOLD UR DATAS')
-    composeDrawings()
+    compose()
   }
 }
 
@@ -136,11 +178,176 @@ function drawSolidLine( lineData ) {
   }
 }
 
-function composeDrawings() {
-  background('white')
-  drawings.forEach(function(drawing) {
-    drawing.lines.forEach(function(line) {
-      drawLine( line, style=lineStyle )
-    }) 
+function setGradient(x, y, w, h, c1, c2, axis) {
+
+  noFill();
+
+  if (axis == Y_AXIS) {  // Top to bottom gradient
+    for (var i = y; i <= y+h; i++) {
+      var inter = map(i, y, y+h, 0, 1);
+      var c = lerpColor(c1, c2, inter);
+      stroke(c);
+      line(x, i, x+w, i);
+    }
+  }  
+  else if (axis == X_AXIS) {  // Left to right gradient
+    for (var i = x; i <= x+w; i++) {
+      var inter = map(i, x, x+w, 0, 1);
+      var c = lerpColor(c1, c2, inter);
+      stroke(c);
+      line(i, y, i, y+h);
+    }
+  }
+}
+
+function setupScale() {  
+  // format Scale
+  prompts[promptIndex].response = .5
+  $('#scale-bar, #scale-start, #scale-end').css({
+    pointerEvents: 'none',
+    position: 'fixed',
+    background:'black',
+    width:width-100,
+    height:5,
+    left: 50,
+    top: height/2
   })
+
+  $('#scale-start, #scale-end').css({
+    width:5,
+    height:50,
+    top: height/2-25 
+  })
+    
+  $('#scale-end').css({
+    left: width-50,
+  })
+ 
+  $('#scale-lo-label, #scale-hi-label').css({
+    pointerEvents: 'none',
+    top: height/2+50,
+    width: width*.3,
+    position: 'fixed',
+  })
+  $('#scale-hi-label').css({
+    textAlign: 'right',
+    right:25
+  })
+  $('#scale-lo-label').css({
+    textAlign: 'left',
+    left:25
+  })
+
+  $('#scale-slider').css({
+    pointerEvents: 'none',
+    position: 'fixed',
+    height:50,
+    width: 10,
+    textAlign: 'left',
+    background:'white',
+    border: '3px solid black',
+    top: height/2-25,
+    left:width/2
+  })
+
+  $('#scale-lo-label').html(prompts[promptIndex].opts[0])
+  $('#scale-hi-label').html(prompts[promptIndex].opts[1])
+}
+
+
+function composeLvl1() {
+  // Compose Body/Birth Data
+  var gender_color,
+    race_color,
+    age = 0, 
+    density = 0;
+  prompts.forEach(function(p) {
+    if (p.prompt == 'CHOOSE YOUR GENDER') {
+      if (p.response) 
+        gender_color = p.response 
+      else 
+        gender_color = color('white')
+    }
+    if (p.prompt == 'CHOOSE YOUR RACE') {
+      if (p.response) 
+        race_color = p.response 
+      else 
+        race_color = color('white')
+    }
+    if (p.prompt == 'HOW LONG HAVE YOU LIVED?') {
+      if (p.response) {
+        age = p.response
+      }   
+    }
+    if (p.prompt == 'HOW POPULATION DENSE WAS YOUR YOUR BIRTHPLACE?' && p.response) 
+        density = p.response
+  })
+  colorMode(RGB, 100);
+  setGradient(0, 0, width, height, gender_color, race_color, Y_AXIS);
+  generate_other_cloud(((density*20)|0)*10, race_color)
+  draw_age( gender_color, race_color, age)
+  colorMode(HSB, W, H, 255);
+}
+
+function generate_other_cloud(n, race_color) {
+  randomSeed(randomSeedVal)
+  for( var i = 0; i < n; i++ ) {
+    x = width * random()
+    y = height * random()
+    drawOther(x,y, race_color)
+  }
+}
+
+function drawOther(x, y, c) {
+  fill('white')
+  stroke('white')
+  ellipseMode(RADIUS);
+  //ellipse(x, y, 5, 5);
+  drawRadialGradientSize(color('white'),color(c),x, y, .09)
+
+}
+
+function drawRadialGradientSize(c1, c2,x, y, age) {
+  var rad = age*200
+  var h = random(0, 360);
+  noStroke();
+  var maxAge = 200;
+  ellipseMode(RADIUS);
+  for (var r = rad; r > 0; --r) {
+    var inter = map(r, 0, rad, 0, 1);
+    var c = lerpColor(c1, c2, inter);
+    fill(c);
+    ellipse(x, y, r, r);
+  }
+}
+function drawRadialGradientRings(c1, c2,x, y, age) {
+  var rad = age*50
+  var h = random(0, 360);
+  noStroke();
+  var maxAge = 200;
+  ellipseMode(RADIUS);
+  for (var r = maxAge; r > 0; --r) {
+    var inter = map(r%(maxAge/rad), 0, rad, 0, 1);
+    var c = lerpColor(c1, c2, inter);
+    fill(c);
+    ellipse(x, y, r, r);
+  }
+}
+
+function draw_age(c1, c2, age) {
+  // as a circle?
+  //drawRadialGradientRings(c1,c2,width/2, height/2, age)
+  drawRadialGradientSize(c1,c2,width/2, height/2, age)
+}
+
+function composeLvl2() {
+  /*
+  p.lines.forEach(function(line) {
+    drawLine( line, style=lineStyle )
+  }) */
+}
+
+function compose() {
+  composeLvl1()
+  composeLvl2()
 }

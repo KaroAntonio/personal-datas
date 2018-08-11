@@ -1,5 +1,9 @@
 body,html { margin: 0px; border: 0px; }
 
+* {
+  cursor: pointer;
+}
+
 #loading {
   position: absolute;
   right: 50vw;
@@ -12,7 +16,7 @@ body,html { margin: 0px; border: 0px; }
 #prompt {
   position: fixed; 
   width: 100vw;
-  font-size: 50px;
+  font-size: 30px;
   padding-top: 10px;
   text-align: center;
 }
