@@ -18,7 +18,8 @@ var prompts = [
   initPrompt('HOW POPULATION DENSE WAS YOUR YOUR BIRTHPLACE?','scale',['It was just me','I lived in the same room as everyone I ever met']),
   //initPrompt('HOW MUCH FAMILY WAS AROUND YOU GROWING UP?','scale',['It was just me','I lived in the same room as everyone I ever met']),
   //initPrompt('WHERE DO U COME FROM','line',['yellow']),
-  initPrompt('DRAW A FAVOURITE CHILDHOOD TOOL','line',['black'])
+  initPrompt('DRAW A REPRESENTATION OF THE PEOPLE YOU GREW UP AROUND','line',['black']),
+  initPrompt('DRAW A FAVOURITE CHILDHOOD TOOL','line',['black']),
   //initPrompt('ARE YOU SATISFIED WITH YOUR BODY','line',['pink']),
   //initPrompt('WHAT SEX ARE YOU','line',['black'])
 ]
@@ -258,9 +259,11 @@ function setupScale() {
 function composeLvl1() {
   // Compose Body/Birth Data
   var gender_color,
-    race_color,
+    race_color = color('white'),
     age = 0, 
-    density = 0;
+    density = 0,
+    other_ppl = [];
+
   prompts.forEach(function(p) {
     if (p.prompt == 'CHOOSE YOUR GENDER') {
       if (p.response) 
@@ -280,22 +283,35 @@ function composeLvl1() {
       }   
     }
     if (p.prompt == 'HOW POPULATION DENSE WAS YOUR YOUR BIRTHPLACE?' && p.response) 
-        density = p.response
+      density = p.response
+    if (p.prompt == 'DRAW A REPRESENTATION OF THE PEOPLE YOU GREW UP AROUND' && p.response) 
+      other_ppl = p.response
   })
   colorMode(RGB, 100);
   setGradient(0, 0, width, height, gender_color, race_color, Y_AXIS);
-  generate_other_cloud(((density*20)|0)*10, race_color)
+  generate_other_cloud(((density*20)|0)*10, race_color, other_ppl)
   draw_age( gender_color, race_color, age)
   colorMode(HSB, W, H, 255);
 }
 
-function generate_other_cloud(n, race_color) {
+function generate_other_cloud(n, race_color, other_lines) {
   randomSeed(randomSeedVal)
   for( var i = 0; i < n; i++ ) {
     x = width * random()
     y = height * random()
     drawOther(x,y, race_color)
+    //new_other = deepcopy(other_lines)
   }
+}
+
+function deepcopy(o) {
+   var output, v, key;
+   output = Array.isArray(o) ? [] : {};
+   for (key in o) {
+       v = o[key];
+       output[key] = (typeof v === "object") ? copy(v) : v;
+   }
+   return output;
 }
 
 function drawOther(x, y, c) {
