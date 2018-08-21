@@ -71,6 +71,8 @@ function setup () {
 }
 
 function draw () {
+  //prompts[1].response = genLines()
+  //drawLines(prompts[1].response)
   if (prompts[promptIndex]) {
     if (prompts[promptIndex].type == 'color'){
         background(encodeColor(mouseX,mouseY))
@@ -296,8 +298,8 @@ function scaleLines(lines,s) {
   // s: a ratio to scale by
   lines.forEach(function(line) {
     line.points.forEach( pt => {
-      pt[0] = pt[0]*s + line.cx * s
-      pt[1] = pt[1]*s + line.cy * s
+      pt[0] = pt[0]*s + line.cx - line.cx*s
+      pt[1] = pt[1]*s + line.cy - line.cy*s
     })
   })
 }
@@ -347,18 +349,17 @@ function generate_other_cloud(n, race_color, other_lines) {
     x = width * random()
     y = height * random()
     drawOther(x,y, race_color)
-    //new_other = deepcopy(other_lines)
+    new_other = deepcopy(other_lines)
+    scaleLines(new_other,.2) 
+    console.log(new_other)
+    positionLines(new_other,x,y) 
+    drawLines( new_other ) 
   }
 }
 
 function deepcopy(o) {
-   var output, v, key;
-   output = Array.isArray(o) ? [] : {};
-   for (key in o) {
-       v = o[key];
-       output[key] = (typeof v === "object") ? copy(v) : v;
-   }
-   return output;
+  // JSON to str to JSON is slowwww
+  return JSON.parse(JSON.stringify(o))
 }
 
 function drawOther(x, y, c) {
