@@ -12,8 +12,8 @@ var lineStyle = 'solid'
 // responses are inserted after prompts
 // [prompt, type, opts, response]
 var prompts = [
-  initPrompt('CHOOSE YOUR GENDER','color',[]),
   initPrompt('CHOOSE YOUR RACE','color',[]),
+  initPrompt('CHOOSE YOUR GENDER','color',[]),
   initPrompt('HOW LONG HAVE YOU LIVED?','scale',['Just a hot second','I run with Dinosaurs']),
   initPrompt('HOW POPULATION DENSE WAS YOUR YOUR BIRTHPLACE?','scale',['It was just me','I lived in the same room as everyone I ever met']),
   //initPrompt('HOW MUCH FAMILY WAS AROUND YOU GROWING UP?','scale',['It was just me','I lived in the same room as everyone I ever met']),
@@ -37,6 +37,7 @@ $(document).ready(function() {
 function setup () {
   ctx = createCanvas(W, H);
   setupPrompt()
+  window.prompts = prompts
 
   ctx.mousePressed(() => { 
     isMouseDown = true;
@@ -90,7 +91,7 @@ function draw () {
 function addNewLineToCurrentResponse() {
   var lines = prompts[promptIndex].response 
   var color = prompts[promptIndex].opts[0]
-  lines.push({'points':[],'color':color})
+  lines.push({'points':[],'color':color, 'cx':W/2, 'cy':H/2})
 }
 
 function encodeColor( x,y ) {
@@ -154,6 +155,12 @@ function nextPrompt () {
     $('#prompt').html('BEHOLD UR DATAS')
     compose()
   }
+}
+
+function drawLines( lines ) {
+  lines.forEach(function(line) {
+    drawLine( line, style=lineStyle )
+  }) 
 }
 
 function drawLine ( lineData , style='points') {
@@ -255,6 +262,45 @@ function setupScale() {
   $('#scale-hi-label').html(prompts[promptIndex].opts[1])
 }
 
+function genLines() {
+  var lines = []
+  var points = []
+  for (var i = 0; i < 10; i++) {
+    points.push([Math.random()*W, Math.random()*H])
+  } 
+  //lines.push({'points':points, 'color':'black'})
+  points = [[10,10],[W,10]]
+  //lines.push({'points':points, 'color':'black'})
+  points = [[10,10],[10,H]]
+  //lines.push({'points':points, 'color':'black'})
+  points = [[0,0],[W,H],[0,H],[W,0]]
+  lines.push({'points':points, 'color':'black', 'cx':W/2, 'cy':H/2})
+  return lines
+}
+
+function positionLines(lines, cx, cy) {
+  var dx, dy;
+  lines.forEach( line => {
+    dx = line.cx - cx 
+    dy = line.cy - cy
+    line.cx = cx
+    line.cy = cy
+    line.points.forEach( pt => {
+      pt[0] = pt[0] - dx
+      pt[1] = pt[1] - dy
+    })
+  })
+}
+
+function scaleLines(lines,s) {
+  // s: a ratio to scale by
+  lines.forEach(function(line) {
+    line.points.forEach( pt => {
+      pt[0] = pt[0]*s + line.cx * s
+      pt[1] = pt[1]*s + line.cy * s
+    })
+  })
+}
 
 function composeLvl1() {
   // Compose Body/Birth Data
@@ -292,6 +338,7 @@ function composeLvl1() {
   generate_other_cloud(((density*20)|0)*10, race_color, other_ppl)
   draw_age( gender_color, race_color, age)
   colorMode(HSB, W, H, 255);
+
 }
 
 function generate_other_cloud(n, race_color, other_lines) {
@@ -336,6 +383,7 @@ function drawRadialGradientSize(c1, c2,x, y, age) {
     ellipse(x, y, r, r);
   }
 }
+
 function drawRadialGradientRings(c1, c2,x, y, age) {
   var rad = age*50
   var h = random(0, 360);
