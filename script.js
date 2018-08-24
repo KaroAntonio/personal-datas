@@ -35,7 +35,7 @@ var prompts = [
   //initPrompt('HOW MUCH FAMILY WAS AROUND YOU GROWING UP?','scale',['It was just me','I lived in the same room as everyone I ever met']),
   //initPrompt('WHERE DO U COME FROM','line',['yellow']),
   initPrompt('DRAW YOUR HOMIES','line',['black']),
-  initPrompt('DRAW A FAVOURITE CHILDHOOD TOOL','line',['black'])
+  initPrompt('DRAW A FAVOURITE CHILDHOOD TOOL','line',['black']),
   //initPrompt('ARE YOU SATISFIED WITH YOUR BODY','line',['pink']),
   //initPrompt('WHAT SEX ARE YOU','line',['black'])
 ]
@@ -91,6 +91,8 @@ function setup () {
 }
 
 function draw () {
+  //prompts[1].response = genLines()
+  //drawLines(prompts[1].response)
   if (prompts[promptIndex]) {
     if (prompts[promptIndex].type == 'color'){
         background(encodeColor(mouseX,mouseY))
@@ -357,7 +359,9 @@ function composeLvl1() {
         age = p.response
     }
     if (p.prompt == 'HOW POPULATION DENSE WAS YOUR YOUR BIRTHPLACE?' && p.response) 
-        density = p.response
+      density = p.response
+    if (p.prompt == 'DRAW A REPRESENTATION OF THE PEOPLE YOU GREW UP AROUND' && p.response) 
+      other_ppl = p.response
   })
   colorMode(RGB, 100);
   setGradient(0, 0, width, height, gender_color, race_color, Y_AXIS);
@@ -378,6 +382,11 @@ function draw_other_cloud(n, race_color, other_shape) {
     scaleLines(new_other, 0.2)
     drawLines(new_other)
   }
+}
+
+function deepcopy(o) {
+  // JSON to str to JSON is slowwww
+  return JSON.parse(JSON.stringify(o))
 }
 
 function drawOther(x, y, c) {
