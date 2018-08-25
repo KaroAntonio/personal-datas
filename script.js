@@ -35,7 +35,7 @@ var prompts = [
   //initPrompt('HOW MUCH FAMILY WAS AROUND YOU GROWING UP?','scale',['It was just me','I lived in the same room as everyone I ever met']),
   //initPrompt('WHERE DO U COME FROM','line',['yellow']),
   initPrompt('DRAW YOUR HOMIES','line',['black']),
-  initPrompt('DRAW A FAVOURITE CHILDHOOD TOOL','line',['black']),
+  initPrompt('DRAW A FAVOURITE CHILDHOOD TOOL','line',['black'])
   //initPrompt('ARE YOU SATISFIED WITH YOUR BODY','line',['pink']),
   //initPrompt('WHAT SEX ARE YOU','line',['black'])
 ]
@@ -91,8 +91,6 @@ function setup () {
 }
 
 function draw () {
-  //prompts[1].response = genLines()
-  //drawLines(prompts[1].response)
   if (prompts[promptIndex]) {
     if (prompts[promptIndex].type == 'color'){
         background(encodeColor(mouseX,mouseY))
@@ -159,7 +157,30 @@ function setupPrompt () {
 
 }
 
+function hackilyAdjustPalette () {
+  var pal = selectPalette()
+  if (pal) {
+    pal.css({
+      left:W/2 - pal.width()/2,
+      top:H/2 - pal.height()/2
+      })
+  }
+}
+
+function selectPalette() {
+  // use a hacky way of getting the palette via css styling
+  var el; 
+  var divs = $('div')
+  for (var i = 0; i < divs.length; i++) {
+    var e = $(divs[i])
+    if ( e.css('borderRadius') == '8px')
+      return e.parent()
+  }
+  return null
+}
+
 function setupColorPicker() {
+  $('.jscolor')[0].jscolor.fromString('ffffff')
   $('.jscolor').show()
   $('.jscolor').css({
       position: 'fixed',
@@ -169,6 +190,12 @@ function setupColorPicker() {
       height: 200, 
       width: 200
     })
+  $('.jscolor').click( () => {
+    console.log('triggerd')
+    hackilyAdjustPalette()
+  })
+  setTimeout( () => { $('.jscolor').click()}, 300 )
+
 }
 
 function nextPrompt () {
@@ -359,9 +386,7 @@ function composeLvl1() {
         age = p.response
     }
     if (p.prompt == 'HOW POPULATION DENSE WAS YOUR YOUR BIRTHPLACE?' && p.response) 
-      density = p.response
-    if (p.prompt == 'DRAW A REPRESENTATION OF THE PEOPLE YOU GREW UP AROUND' && p.response) 
-      other_ppl = p.response
+        density = p.response
   })
   colorMode(RGB, 100);
   setGradient(0, 0, width, height, gender_color, race_color, Y_AXIS);
@@ -382,11 +407,6 @@ function draw_other_cloud(n, race_color, other_shape) {
     scaleLines(new_other, 0.2)
     drawLines(new_other)
   }
-}
-
-function deepcopy(o) {
-  // JSON to str to JSON is slowwww
-  return JSON.parse(JSON.stringify(o))
 }
 
 function drawOther(x, y, c) {
