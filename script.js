@@ -7,44 +7,43 @@ var isMouseDown = false;
 var randomSeedVal = Math.random()*100
 var sendgridApiKey = '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'
 var smtpjsToken = 'd48c379c-c7f6-4c20-9f95-a906e005e9d7'
+
 // Elastic Email
 var smtp_uname = 'karoantonio@gmail.com'
 var smtp_pwd = '76479e50-aed0-4281-8e90-76f8e6ac87b0'
 var smtp_server = 'smtp.elasticemail.com'
 var smtp_port = '2525'
 
-// SendGrid
-/*
-var smtp_server = 'smtp.sendgrid.net'
-var smtp_uname = 'KaroAntonio'
-var smtp_pwd = 'CJ*nl%0vL689'
-*/
+var printer_email = '54w9644w@hpeprint.com'
 
 var Y_AXIS = 1;
 var X_AXIS = 2;
 
 var lineStyle = 'solid'
 
-// responses are inserted after prompts
-// [prompt, type, opts, response]
-var prompts = [
-  initPrompt('CHOOSE YOUR RACE','color',[]),
-  initPrompt('CHOOSE YOUR GENDER','color',[]),
-  initPrompt('HOW LONG HAVE YOU LIVED?','scale',['Just a hot second','I run with Dinosaurs']),
-  initPrompt('HOW POPULATION DENSE WAS YOUR YOUR BIRTHPLACE?','scale',['It was just me','I lived in the same room as everyone I ever met']),
-  //initPrompt('HOW MUCH FAMILY WAS AROUND YOU GROWING UP?','scale',['It was just me','I lived in the same room as everyone I ever met']),
-  //initPrompt('WHERE DO U COME FROM','line',['yellow']),
-  initPrompt('DRAW YOUR HOMIES','line',['black']),
-  initPrompt('DRAW A FAVOURITE CHILDHOOD TOOL','line',['black'])
-  //initPrompt('ARE YOU SATISFIED WITH YOUR BODY','line',['pink']),
-  //initPrompt('WHAT SEX ARE YOU','line',['black'])
-]
-
-// prompts are in reverse, deal with it
-prompts.reverse()
-
-var promptIndex = prompts.length - 1
+var prompts;
+var promptIndex;
 var ctx;
+
+function initPrompts() {
+  // responses are inserted after prompts
+  // [type, prompt, id, default, opts]
+   prompts = [
+    initPrompt('text','DESCRIBE YOURSELF','selfWords','',[]),
+    initPrompt('color','CHOOSE YOUR RACE','raceColor',color('white'),[]),
+    initPrompt('color','CHOOSE YOUR GENDER','genderColor',color('white'),[]),
+    initPrompt('scale','HOW LONG HAVE YOU LIVED?','age',0,['Just a hot second','I run with Dinosaurs']),
+    initPrompt('line','DRAW YOUR HOMIES','otherLines',[],['black']),
+    initPrompt('scale','HOW POPULATION DENSE WAS YOUR YOUR BIRTHPLACE?','density',.3,['It was just me','I lived in the same room as everyone I ever met']),
+    initPrompt('scale','HOW OFTEN DO YOU CONNECT?','density',0,['Once per heartbeat','Only when physically forced to do so']),
+    //initPrompt('ARE YOU SATISFIED WITH YOUR BODY','line',['pink']),
+    //initPrompt('WHAT SEX ARE YOU','line',['black'])
+  ]
+
+  // prompts are in reverse, deal with it
+  prompts.reverse()
+  return prompts
+}
 
 $(document).ready(function() {
 	$('#loading').hide();
@@ -56,6 +55,9 @@ function setup () {
   $(ctx.elt).css({
     marginLeft:(W-S)/2,
   })
+
+  prompts = initPrompts()
+  promptIndex = prompts.length - 1
 
   window.prompts = prompts
   setupPrompt()
@@ -80,14 +82,21 @@ function setup () {
       }
     }
   })
-  ctx.mouseReleased(() => { isMouseDown = false;})
+  ctx.mouseReleased(() => { 
+    isMouseDown = false;
+    if (prompts[promptIndex].type == 'line') {
+      compose()
+      drawLines(prompts[promptIndex].response)
+    }
+  })
 
   $('#next-button').click(function (evt) {
-    evt.stopPropagation() 
-    evt.preventDefault();
-    console.log('NEXT')
     nextPrompt()
   }) 
+  $('#back-button').click(function (evt) {
+    prevPrompt()
+  }) 
+
 }
 
 function draw () {
@@ -97,7 +106,7 @@ function draw () {
         compose()
         fill(encodeColor(mouseX,mouseY))
         noStroke()
-        rect(width/2-50,height/2-50, 100,100)
+        //rect(width/2-50,height/2-50, 100,100)
     } else if (prompts[promptIndex].type == 'line' && isMouseDown && promptIndex >= 0) {
       var lines = prompts[promptIndex].response
       var line = lines[lines.length-1]
@@ -120,12 +129,13 @@ function encodeColor( x,y ) {
     return color(x, y, 255)
 }
 
-function initPrompt(prompt_str, type, opts) {
+function initPrompt(type, prompt_str, id, default_response, opts) {
   return {
+    'id': id,
     'prompt': prompt_str,
     'type': type,
     'opts': opts,
-    'response': null
+    'response': default_response
   }
 }
 
@@ -133,6 +143,8 @@ function setupPrompt () {
   // hide existing prompts
   $('.jscolor').hide()
   $('#scale').hide()
+  $('#text-input').hide()
+  $('#undo-button').hide()
 
   $('#prompt').html(prompts[promptIndex].prompt)
   $('#prompt').css({
@@ -146,15 +158,25 @@ function setupPrompt () {
     setupColorPicker()
   }
   else if (prompts[promptIndex].type == 'scale') {
-    $('#scale').show()
     setupScale()
+  }
+  else if (prompts[promptIndex].type == 'text') {
+    setupTextInput()
   }
   else if (prompts[promptIndex].type == 'line') {
     lines = prompts[promptIndex].response 
     if (!lines) prompts[promptIndex].response = []
+    $('#undo-button').show()
+    $('#undo-button').css({
+      left:W/2-100 
+    })
+    $('#undo-button').click(()=>{
+      lines.pop() 
+      compose()
+      drawLines(lines)
+    })
   }
   compose()
-
 }
 
 function hackilyAdjustPalette () {
@@ -191,11 +213,17 @@ function setupColorPicker() {
       width: 200
     })
   $('.jscolor').click( () => {
-    console.log('triggerd')
     hackilyAdjustPalette()
   })
   setTimeout( () => { $('.jscolor').click()}, 300 )
 
+}
+
+function prevPrompt () {
+  if ( promptIndex < prompts.length ) {
+    promptIndex += 1
+    setupPrompt()
+  }
 }
 
 function nextPrompt () {
@@ -270,7 +298,25 @@ function setGradient(x, y, w, h, c1, c2, axis) {
   }
 }
 
+function setupTextInput() {
+  $('#text-input').show()
+  $('#text-input').css({
+    position:'fixed',
+    width: 200,
+    left: W/2-100,
+    fontSize: 30,
+    top: H/2-150
+  })
+  $('#text-input').attr('maxlength',10)
+
+  $('#text-input').on('keyup paste',() => {
+    console.log('UPDATE')
+    prompts[promptIndex].response = $('#text-input').val()
+  })
+}
+
 function setupScale() {  
+  $('#scale').show()
   // format Scale
   prompts[promptIndex].response = .5
   $('#scale-bar, #scale-start, #scale-end').css({
@@ -296,12 +342,13 @@ function setupScale() {
   $('#scale-lo-label, #scale-hi-label').css({
     pointerEvents: 'none',
     top: height/2+50,
-    width: W*.3,
+    width: width*.3,
     position: 'fixed',
+    background:'rgba(255, 255, 255, 0.8)'
   })
   $('#scale-hi-label').css({
     textAlign: 'right',
-    right: (left_offset)-50,
+    right: (left_offset)+25,
   })
   $('#scale-lo-label').css({
     textAlign: 'left',
@@ -366,32 +413,16 @@ function scaleLines(lines,s) {
 }
 
 function composeLvl1() {
-  // Compose Body/Birth Data
-  var gender_color = color('white'),
-    race_color = color('white'),
-    age = 0, 
-    density = 0, 
-    other_shape = [];
+  var rsps = {} // responses
   prompts.forEach(function(p) {
-    if (p.prompt == 'CHOOSE YOUR GENDER' && p.response) {
-        gender_color = p.response 
-    }
-    if (p.prompt == 'CHOOSE YOUR RACE' && p.response) {
-        race_color = p.response 
-    }
-    if (p.prompt == 'DRAW YOUR HOMIES' && p.response) {
-      other_shape = p.response
-    }
-    if (p.prompt == 'HOW LONG HAVE YOU LIVED?' && p.response) {
-        age = p.response
-    }
-    if (p.prompt == 'HOW POPULATION DENSE WAS YOUR YOUR BIRTHPLACE?' && p.response) 
-        density = p.response
+    rsps[p.id] = p.response
   })
+
   colorMode(RGB, 100);
-  setGradient(0, 0, width, height, gender_color, race_color, Y_AXIS);
-  draw_other_cloud(((density*20)|0)*10, race_color, other_shape)
-  draw_age( gender_color, race_color, age)
+  setGradient(0, 0, width, height, rsps.genderColor, rsps.raceColor, Y_AXIS);
+  draw_other_cloud(((rsps.density*20)|0)*10, rsps.raceColor, rsps.otherLines)
+  draw_age( rsps.genderColor, rsps.raceColor, rsps.age)
+  draw_text( rsps.selfWords , width/2, height/2)
   colorMode(HSB, W, H, 255);
 
 }
@@ -401,7 +432,7 @@ function draw_other_cloud(n, race_color, other_shape) {
   for( var i = 0; i < n; i++ ) {
     x = width * random()
     y = height * random()
-    drawOther(x,y, race_color)
+    //drawOther(x,y, race_color)
     new_other = deepcopy(other_shape)
     positionLines(new_other, x,y)
     scaleLines(new_other, 0.2)
@@ -477,6 +508,14 @@ function sendEmail() {
   );
 }
 
+function draw_text(s,x,y) {
+  textSize(32);
+  textAlign('center')
+  textFont('Georgia');
+  fill('black')
+  text(s, x, y);
+}
+
 function updateColor(picker) {
   console.log(picker.toHEXString())
   prompts[promptIndex].response = color(picker.toHEXString())
@@ -485,7 +524,6 @@ function updateColor(picker) {
 function deepcopy(o) {
   return JSON.parse(JSON.stringify(o))
 }
-
 
 function sendEmailWithAttachment(datauri) {
   var from_email = "karoantonio@gmail.com"

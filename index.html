@@ -9,14 +9,23 @@
   <body>
 	  <img id='loading' src='assets/loading.gif'>
       <div id='prompt'>PROMPT</div>
-      <div id='next-button' onselectstart='return false;'>
-        <div id='confirm'>NEXT</div>
-        <div id='counter-label'> 
-          <div id='question-counter'>10</div>
-          MORE DATA QUESTIONS 
+      <div id='back-button' onselectstart='return false;'>
+        <div class='big-button'>BACK</div>
       </div>
+      <div id='undo-button' onselectstart='return false;'>
+        <div class='big-button'>UNDO</div>
+      </div>
+        <div>UNDO</div>
+      </div>
+      <div id='next-button' onselectstart='return false;'>
+        <div class='big-button'>NEXT</div>
+          <div id='counter-label'> 
+            <div id='question-counter'>10</div>
+            MORE DATA QUESTIONS 
         </div>
+      </div>
         <button id='color-picker' class="jscolor {onFineChange:'updateColor(this)', width:300, height:300, top:100, position:'fixed', left: -100}">CLICK</button>
+        <input type="text" name="fname" id='text-input'></input>
         <div id='scale'>
           <div id='scale-bar'></div>
           <div id='scale-start'></div>
