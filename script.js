@@ -33,9 +33,12 @@ function initPrompts() {
     initPrompt('color','CHOOSE YOUR RACE','raceColor',color('white'),[]),
     initPrompt('color','CHOOSE YOUR GENDER','genderColor',color('white'),[]),
     initPrompt('scale','HOW LONG HAVE YOU LIVED?','age',0,['Just a hot second','I run with Dinosaurs']),
-    initPrompt('line','DRAW YOUR HOMIES','otherLines',[],['black']),
+    initPrompt('line','DRAW YOUR REAL LIFE HOMIES','realLines',[],['black']),
+    initPrompt('line','DRAW YOUR NET HOMIES','netLines',[],['black']),
     initPrompt('scale','HOW POPULATION DENSE WAS YOUR YOUR BIRTHPLACE?','density',.3,['It was just me','I lived in the same room as everyone I ever met']),
-    initPrompt('scale','HOW OFTEN DO YOU CONNECT?','density',0,['Once per heartbeat','Only when physically forced to do so']),
+    initPrompt('scale','HOW OFTEN DO YOU CONNECT?','netCloseness',0,['Once per heartbeat','When physically forced to do so']),
+    initPrompt('line','DRAW YOUR FAVE DIGITAL DETOX?','detoxLines',[],['black']),
+    initPrompt('text','WHAT IS YOUR FAVE PLACE ON THE NET','netHome','',[]),
     //initPrompt('ARE YOU SATISFIED WITH YOUR BODY','line',['pink']),
     //initPrompt('WHAT SEX ARE YOU','line',['black'])
   ]
@@ -84,9 +87,11 @@ function setup () {
   })
   ctx.mouseReleased(() => { 
     isMouseDown = false;
-    if (prompts[promptIndex].type == 'line') {
-      compose()
-      drawLines(prompts[promptIndex].response)
+    if (prompts[promptIndex]) {
+      if (prompts[promptIndex].type == 'line') {
+        compose()
+        drawLines(prompts[promptIndex].response)
+      }
     }
   })
 
@@ -94,7 +99,8 @@ function setup () {
     nextPrompt()
   }) 
   $('#back-button').click(function (evt) {
-    prevPrompt()
+    if (promptIndex < prompts.length-1)
+      prevPrompt()
   }) 
 
 }
@@ -139,12 +145,17 @@ function initPrompt(type, prompt_str, id, default_response, opts) {
   }
 }
 
-function setupPrompt () {  
+
+function clearPrompts() {
   // hide existing prompts
   $('.jscolor').hide()
   $('#scale').hide()
   $('#text-input').hide()
   $('#undo-button').hide()
+}
+
+function setupPrompt () {  
+  clearPrompts()
 
   $('#prompt').html(prompts[promptIndex].prompt)
   $('#prompt').css({
@@ -232,9 +243,11 @@ function nextPrompt () {
     setupPrompt()
   } else {
     // end
+    clearPrompts()
     promptIndex -= 1
     console.log('END')
     $('#next-button').remove()
+    $('#back-button').remove()
     $('#prompt').html('BEHOLD UR DATAS')
 
     console.log('ENABLE EMAIL PORTION')
@@ -300,6 +313,7 @@ function setGradient(x, y, w, h, c1, c2, axis) {
 
 function setupTextInput() {
   $('#text-input').show()
+  $('#text-input').val(prompts[promptIndex].response)
   $('#text-input').css({
     position:'fixed',
     width: 200,
@@ -312,6 +326,7 @@ function setupTextInput() {
   $('#text-input').on('keyup paste',() => {
     console.log('UPDATE')
     prompts[promptIndex].response = $('#text-input').val()
+    compose()
   })
 }
 
@@ -412,32 +427,37 @@ function scaleLines(lines,s) {
   })
 }
 
-function composeLvl1() {
+function compose() {
   var rsps = {} // responses
   prompts.forEach(function(p) {
     rsps[p.id] = p.response
   })
 
   colorMode(RGB, 100);
-  setGradient(0, 0, width, height, rsps.genderColor, rsps.raceColor, Y_AXIS);
-  draw_other_cloud(((rsps.density*20)|0)*10, rsps.raceColor, rsps.otherLines)
+  background('white')
+  //setGradient(0, 0, width, height, rsps.genderColor, rsps.raceColor, Y_AXIS);
+  draw_other_cloud(((rsps.density*20)|0)*10, rsps.raceColor, rsps.realLines, 0)
+  draw_other_cloud(((rsps.density*20)|0)*10, rsps.raceColor, rsps.netLines, 100)
   draw_age( rsps.genderColor, rsps.raceColor, rsps.age)
+  //drawOrbitalCloud(rsps.realLines, 10, 20, 50)
   draw_text( rsps.selfWords , width/2, height/2)
   colorMode(HSB, W, H, 255);
-
 }
 
-function draw_other_cloud(n, race_color, other_shape) {
-  randomSeed(randomSeedVal)
+function draw_other_cloud(n, race_color, other_shape, randOffset) {
+  randomSeed(randomSeedVal+randOffset)
   for( var i = 0; i < n; i++ ) {
     x = width * random()
     y = height * random()
-    //drawOther(x,y, race_color)
-    new_other = deepcopy(other_shape)
-    positionLines(new_other, x,y)
-    scaleLines(new_other, 0.2)
-    drawLines(new_other)
+    drawLinesCopy(other_shape, x, y, 0.2)
   }
+}
+
+function drawLinesCopy(lines, x, y, s) {
+    new_lines = deepcopy(lines)
+    positionLines(new_lines, x,y)
+    scaleLines(new_lines, s)
+    drawLines(new_lines)
 }
 
 function drawOther(x, y, c) {
@@ -446,31 +466,47 @@ function drawOther(x, y, c) {
   ellipseMode(RADIUS);
   //ellipse(x, y, 5, 5);
   drawRadialGradientSize(color('white'),color(c),x, y, .09)
-
 }
 
 function drawRadialGradientSize(c1, c2,x, y, age) {
   var rad = age*200
   var h = random(0, 360);
   noStroke();
+  var thickness = 30;
+  var minRad = rad < thickness ? 0 : rad-thickness;
   var maxAge = 200;
   ellipseMode(RADIUS);
   for (var r = rad; r > 0; --r) {
-    var inter = map(r, 0, rad, 0, 1);
+    var inter = map(r, minRad, rad, 0, 1);
     var c = lerpColor(c1, c2, inter);
-    fill(c);
+    if (r < minRad) fill('white')
+    else fill(c);
     ellipse(x, y, r, r);
+  }
+}
+
+function drawOrbitalCloud(lines, n, innerRad, outerRad) {
+  // of lines
+  randomSeed(randomSeedVal)
+  var radRange = outerRad - innerRad
+  for (var i = 0; i < n; i++ ) {
+    var rad = Math.PI * 2 * Math.random()
+    var r = Math.PI * radRange + innerRad 
+    var x = r * Math.cos(rad) + width/2
+    var y = r * Math.sin(rad) + height/2
+    drawLinesCopy(lines, x,y,.3)
   }
 }
 
 function drawRadialGradientRings(c1, c2,x, y, age) {
   var rad = age*50
-  var h = random(0, 360);
   noStroke();
   var maxAge = 200;
+  var thickness = 30;
+  var minRad = age < thickness ? 0 : age-thickness;
   ellipseMode(RADIUS);
-  for (var r = maxAge; r > 0; --r) {
-    var inter = map(r%(maxAge/rad), 0, rad, 0, 1);
+  for (var r = maxAge; r > minRad; --r) {
+    var inter = map(r%(maxAge/rad), minRad, rad, 0, 1);
     var c = lerpColor(c1, c2, inter);
     fill(c);
     ellipse(x, y, r, r);
@@ -481,18 +517,6 @@ function draw_age(c1, c2, age) {
   // as a circle?
   //drawRadialGradientRings(c1,c2,width/2, height/2, age)
   drawRadialGradientSize(c1,c2,width/2, height/2, age)
-}
-
-function composeLvl2() {
-  /*
-  p.lines.forEach(function(line) {
-    drawLine( line, style=lineStyle )
-  }) */
-}
-
-function compose() {
-  composeLvl1()
-  composeLvl2()
 }
 
 function sendEmail() {
