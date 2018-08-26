@@ -29,10 +29,10 @@ function initPrompts() {
   // responses are inserted after prompts
   // [type, prompt, id, default, opts]
    prompts = [
-    initPrompt('text','DESCRIBE YOURSELF','selfWords','',[]),
     initPrompt('color','CHOOSE YOUR RACE','raceColor',color('white'),[]),
     initPrompt('color','CHOOSE YOUR GENDER','genderColor',color('white'),[]),
-    initPrompt('scale','HOW LONG HAVE YOU LIVED?','age',0,['Just a hot second','I run with Dinosaurs']),
+    initPrompt('scale','HOW LONG HAVE YOU LIVED?','age',1.3,['Just a hot second','I run with Dinosaurs']),
+    initPrompt('text','DESCRIBE YOURSELF','selfWords','',[]),
     initPrompt('line','DRAW YOUR REAL LIFE HOMIES','realLines',[],['black']),
     initPrompt('line','DRAW YOUR NET HOMIES','netLines',[],['black']),
     initPrompt('scale','HOW POPULATION DENSE WAS YOUR YOUR BIRTHPLACE?','density',.3,['It was just me','I lived in the same room as everyone I ever met']),
@@ -161,7 +161,7 @@ function setupPrompt () {
   $('#prompt').css({
     background:'rgba(255, 255, 255, 0.5)'
   })
-  $('#question-counter').html((promptIndex).toString())
+  //$('#question-counter').html((promptIndex).toString())
   background('white')
 
   if (prompts[promptIndex].type == 'color') {
@@ -175,6 +175,13 @@ function setupPrompt () {
     setupTextInput()
   }
   else if (prompts[promptIndex].type == 'line') {
+    setupLinesInput()
+  }
+  compose()
+}
+
+function setupLinesInput () {
+
     lines = prompts[promptIndex].response 
     if (!lines) prompts[promptIndex].response = []
     $('#undo-button').show()
@@ -186,16 +193,14 @@ function setupPrompt () {
       compose()
       drawLines(lines)
     })
-  }
-  compose()
 }
 
 function hackilyAdjustPalette () {
   var pal = selectPalette()
   if (pal) {
     pal.css({
-      left:W/2 - pal.width()/2,
-      top:H/2 - pal.height()/2
+      left:width/2 - pal.width()/2,
+      top:height/2 - pal.height()/2
       })
   }
 }
@@ -212,21 +217,27 @@ function selectPalette() {
   return null
 }
 
+function hackilySetupPalette() {
+  var e1 = document.createEvent("MouseEvents");
+  e1.initMouseEvent("mousedown", true, true, window, 1, 0, 0, 0, 0, false, false, false, false, 0, null);
+  jQuery('.jscolor')[0].dispatchEvent(e1)
+  hackilyAdjustPalette()
+}
+
 function setupColorPicker() {
   $('.jscolor')[0].jscolor.fromString('ffffff')
   $('.jscolor').show()
   $('.jscolor').css({
       position: 'fixed',
       zIndex: 20,
-      left:W/2-100,
-      top: H/2-100,
+      left:width/2-100,
+      top: height/2-100,
       height: 200, 
       width: 200
     })
-  $('.jscolor').click( () => {
-    hackilyAdjustPalette()
-  })
-  setTimeout( () => { $('.jscolor').click()}, 300 )
+  setTimeout( () => { 
+    hackilySetupPalette()
+  }, 00 )
 
 }
 
@@ -324,7 +335,6 @@ function setupTextInput() {
   $('#text-input').attr('maxlength',10)
 
   $('#text-input').on('keyup paste',() => {
-    console.log('UPDATE')
     prompts[promptIndex].response = $('#text-input').val()
     compose()
   })
@@ -440,8 +450,20 @@ function compose() {
   draw_other_cloud(((rsps.density*20)|0)*10, rsps.raceColor, rsps.netLines, 100)
   draw_age( rsps.genderColor, rsps.raceColor, rsps.age)
   //drawOrbitalCloud(rsps.realLines, 10, 20, 50)
+  // Draw Personal Symbols
+  drawLinesCopy(rsps.realLines, width/2-50,height/2-50,.4)
+  drawLinesCopy(rsps.netLines, width/2+50,height/2-50,.4)
+  drawLinesCopy(rsps.detoxLines, width/2,height/2+80,.4)
+
   draw_text( rsps.selfWords , width/2, height/2)
   colorMode(HSB, W, H, 255);
+}
+
+function draw_white_circle() {
+  fill('white')
+  stroke('white')
+  ellipseMode(RADIUS);
+  ellipse(width/2, height/2, 100, 100);
 }
 
 function draw_other_cloud(n, race_color, other_shape, randOffset) {
@@ -449,7 +471,7 @@ function draw_other_cloud(n, race_color, other_shape, randOffset) {
   for( var i = 0; i < n; i++ ) {
     x = width * random()
     y = height * random()
-    drawLinesCopy(other_shape, x, y, 0.2)
+    drawLinesCopy(other_shape, x, y, 0.15)
   }
 }
 
@@ -514,6 +536,7 @@ function drawRadialGradientRings(c1, c2,x, y, age) {
 }
 
 function draw_age(c1, c2, age) {
+  draw_white_circle()
   // as a circle?
   //drawRadialGradientRings(c1,c2,width/2, height/2, age)
   drawRadialGradientSize(c1,c2,width/2, height/2, age)
@@ -541,7 +564,6 @@ function draw_text(s,x,y) {
 }
 
 function updateColor(picker) {
-  console.log(picker.toHEXString())
   prompts[promptIndex].response = color(picker.toHEXString())
 }
 

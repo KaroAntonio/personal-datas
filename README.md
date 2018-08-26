@@ -1,10 +1,7 @@
 # DATA 
 
 ## TODO
- - add text input 
- - add Gender and race explanation
+ - make all resources local
  - limit drawing line
- - add back button to drawing
- - align canvas on portrait screens
 
 
