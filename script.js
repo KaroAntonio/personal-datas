@@ -34,11 +34,12 @@ function initPrompts() {
     initPrompt('scale','HOW LONG HAVE YOU LIVED?','age',1.3,['Just a hot second','I run with Dinosaurs']),
     initPrompt('text','DESCRIBE YOURSELF','selfWords','',[]),
     initPrompt('line','DRAW YOUR REAL LIFE HOMIES','realLines',[],['black']),
-    initPrompt('line','DRAW YOUR NET HOMIES','netLines',[],['black']),
-    initPrompt('scale','HOW POPULATION DENSE WAS YOUR YOUR BIRTHPLACE?','density',.3,['It was just me','I lived in the same room as everyone I ever met']),
-    initPrompt('scale','HOW OFTEN DO YOU CONNECT?','netCloseness',0,['Once per heartbeat','When physically forced to do so']),
-    initPrompt('line','DRAW YOUR FAVE DIGITAL DETOX?','detoxLines',[],['black']),
-    initPrompt('text','WHAT IS YOUR FAVE PLACE ON THE NET','netHome','',[]),
+    initPrompt('scale','HOW CLOSE ARE YOU TO YOUR REAL LIFE HOMIES?','irlDensity',.3,['I am my own everything','I need others to keep my blood pumping.']),
+    initPrompt('line','DRAW YOUR INTERNET HOMIES','netLines',[],['black']),
+    initPrompt('scale','HOW CLOSE ARE YOU TO YOUR INTERNET HOMIES?','netDensity',.3,['I lost my msn password in 2001','Memes are Oxygen']),
+    initPrompt('text','ENTER A [GUILTY] PLEASURE','pleasure','',[]),
+    initPrompt('line','DRAW YOUR FAVE DIGITAL DETOX','detoxLines',[],['black']),
+    //initPrompt('text','WHAT IS YOUR FAVE PLACE ON THE NET','netHome','',[]),
     //initPrompt('ARE YOU SATISFIED WITH YOUR BODY','line',['pink']),
     //initPrompt('WHAT SEX ARE YOU','line',['black'])
   ]
@@ -61,9 +62,9 @@ function setup () {
 
   prompts = initPrompts()
   promptIndex = prompts.length - 1
+  setupPrompt()
 
   window.prompts = prompts
-  setupPrompt()
 
   ctx.mousePressed(() => { 
     isMouseDown = true;
@@ -102,7 +103,19 @@ function setup () {
     if (promptIndex < prompts.length-1)
       prevPrompt()
   }) 
+  $('#undo-button').click(()=>{
+    lines.pop() 
+    compose()
+    drawLines(lines)
+  })
 
+  $('#restart-button').click(() => {
+    prompts = initPrompts()
+    promptIndex = prompts.length - 1
+    setupPrompt()
+    $('#next-button').show()
+    $('#back-button').show()
+  })
 }
 
 function draw () {
@@ -152,6 +165,7 @@ function clearPrompts() {
   $('#scale').hide()
   $('#text-input').hide()
   $('#undo-button').hide()
+  $('#restart-button').hide()
 }
 
 function setupPrompt () {  
@@ -163,6 +177,7 @@ function setupPrompt () {
   })
   //$('#question-counter').html((promptIndex).toString())
   background('white')
+  compose()
 
   if (prompts[promptIndex].type == 'color') {
     colorMode(HSB, width, height, 255);
@@ -177,7 +192,6 @@ function setupPrompt () {
   else if (prompts[promptIndex].type == 'line') {
     setupLinesInput()
   }
-  compose()
 }
 
 function setupLinesInput () {
@@ -188,18 +202,15 @@ function setupLinesInput () {
     $('#undo-button').css({
       left:W/2-100 
     })
-    $('#undo-button').click(()=>{
-      lines.pop() 
-      compose()
-      drawLines(lines)
-    })
+    compose()
+    drawLines(lines)
 }
 
 function hackilyAdjustPalette () {
   var pal = selectPalette()
   if (pal) {
     pal.css({
-      left:width/2 - pal.width()/2,
+      left:W/2 - pal.width()/2,
       top:height/2 - pal.height()/2
       })
   }
@@ -230,7 +241,7 @@ function setupColorPicker() {
   $('.jscolor').css({
       position: 'fixed',
       zIndex: 20,
-      left:width/2-100,
+      left:W/2-100,
       top: height/2-100,
       height: 200, 
       width: 200
@@ -257,9 +268,16 @@ function nextPrompt () {
     clearPrompts()
     promptIndex -= 1
     console.log('END')
-    $('#next-button').remove()
-    $('#back-button').remove()
+    $('#next-button').hide()
+    $('#back-button').hide()
     $('#prompt').html('BEHOLD UR DATAS')
+    $('#back-button').hide()
+    $('#restart-button').show()
+    $('#restart-button').css({
+      position: 'fixed',
+      bottom: 0,
+      left:W/2-100 
+    })
 
     console.log('ENABLE EMAIL PORTION')
     saveFrames('out', 'png', 1, 1, function(data) {
@@ -330,7 +348,7 @@ function setupTextInput() {
     width: 200,
     left: W/2-100,
     fontSize: 30,
-    top: H/2-150
+    top: height/2-150
   })
   $('#text-input').attr('maxlength',10)
 
@@ -446,8 +464,8 @@ function compose() {
   colorMode(RGB, 100);
   background('white')
   //setGradient(0, 0, width, height, rsps.genderColor, rsps.raceColor, Y_AXIS);
-  draw_other_cloud(((rsps.density*20)|0)*10, rsps.raceColor, rsps.realLines, 0)
-  draw_other_cloud(((rsps.density*20)|0)*10, rsps.raceColor, rsps.netLines, 100)
+  draw_other_cloud(((rsps.irlDensity*10)|0)*3, rsps.raceColor, rsps.realLines, 0)
+  draw_other_cloud(((rsps.netDensity*10)|0)*3, rsps.raceColor, rsps.netLines, 100)
   draw_age( rsps.genderColor, rsps.raceColor, rsps.age)
   //drawOrbitalCloud(rsps.realLines, 10, 20, 50)
   // Draw Personal Symbols
@@ -456,6 +474,7 @@ function compose() {
   drawLinesCopy(rsps.detoxLines, width/2,height/2+80,.4)
 
   draw_text( rsps.selfWords , width/2, height/2)
+  draw_text( rsps.pleasure , width/2, height/2+17)
   colorMode(HSB, W, H, 255);
 }
 
@@ -557,6 +576,7 @@ function sendEmail() {
 
 function draw_text(s,x,y) {
   textSize(32);
+  strokeWeight(0)
   textAlign('center')
   textFont('Georgia');
   fill('black')
@@ -577,8 +597,8 @@ function sendEmailWithAttachment(datauri) {
   Email.sendWithAttachment(
   from_email,
   to_email,
-  "This is a subject",
-  "this is the body",
+  "Data Image",
+  "use with care",
   smtp_server,
   smtp_uname,
   smtp_pwd,

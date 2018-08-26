@@ -75,8 +75,16 @@ body,html { margin: 0px; border: 0px; }
   user-select: none;
 }
 
-
-
+#restart-button {
+  position: fixed;
+  width: 200px;
+  left: 0px;
+  bottom: 0px;
+  padding-bottom: 10px;
+  padding-right: 10px;
+  text-align: right;
+  z-index: 20;
+}
 
 #next-button:hover {
   cursor: pointer;
