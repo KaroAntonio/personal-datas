@@ -34,19 +34,23 @@ function initPrompts() {
   // responses are inserted after prompts
   // [type, prompt, id, default, opts]
    prompts = [
+    initPrompt('splash','SPLASH','#intro-page','',[]),
+    initPrompt('splash','SPLASH','#demo-page','',[]),
     initPrompt('color','CHOOSE YOUR GENDER','genderColor',color('white'),[]),
     initPrompt('color','CHOOSE YOUR ETHNICITY','raceColor',color('white'),[]),
-    initPrompt('scale','HOW LONG HAVE YOU LIVED?','age',.6,['Just a hot second','I run with Dinosaurs']),
+    initPrompt('scale','HOW LONG HAVE YOU LIVED?','age',.8,['Just a hot second','I run with Dinosaurs']),
+    initPrompt('splash','SPLASH','#behavior-page','',[]),
     initPrompt('text','WHAT IS YOUR FAVOURITE ROUTINE?','routine','',[]),
     initPrompt('line','DRAW WHO YOU INTERACT WITH MOST OFFLINE','realLines',[],['#ed65a9']),
     initPrompt('scale','HOW STRONG ARE YOUR OFFLINE INTERACTIONS?','irlDensity',.3,['I am my own everything','I need others to keep my blood pumping.']),
     initPrompt('line','DRAW WHO YOU INTERACT WITH MOST ONLINE','netLines',[],['#4c82ff']),
     initPrompt('scale','HOW STRONG ARE YOUR ONLINE INTERACTIONS?','netDensity',.3,['I lost my msn password in 2001','Memes are Oxygen']),
+    initPrompt('splash','SPLASH','#mind-page','',[]),
     initPrompt('scale','THE FUTURE OF THE INTERNET?','future',NaN,['COLD','HOT']),
     initPrompt('text','DESCRIBE YESTERDAY\'S MAGIC MOMENT','magic','',[]),
     initPrompt('text','DESCRIBE LAST WEEKS ANXIETY','anxiety','',[]),
-    //initPrompt('line','DRAW YOUR FAVE DIGITAL DETOX','detoxLines',[],['#cc082b']),
     initPrompt('line','DRAW YOUR FAVE DIGITAL DETOX','detoxLines',[],['#55a07c']),
+    initPrompt('splash','SPLASH','#final-page','',[]),
     //initPrompt('text','WHAT IS YOUR FAVE PLACE ON THE NET','netHome','',[]),
     //initPrompt('ARE YOU SATISFIED WITH YOUR BODY','line',['pink']),
     //initPrompt('WHAT SEX ARE YOU','line',['black'])
@@ -71,7 +75,6 @@ function setup () {
   clearPrompts()
   prompts = initPrompts()
   promptIndex = prompts.length - 1
-  setupIntroPage()
   setupPrompt()
 
   window.prompts = prompts
@@ -140,7 +143,7 @@ function draw () {
       var lines = prompts[promptIndex].response
       var line = lines[lines.length-1]
       line.points.push([mouseX, mouseY])
-      drawLine( line, style=lineStyle )
+      if (line) drawLine( line, style=lineStyle )
     } else {
     }
   }
@@ -178,6 +181,12 @@ function clearPrompts() {
   $('#undo-button').hide()
   $('#restart-button').hide()
   $('#synchronized-banner').hide()
+
+  $('#intro-page').hide()
+  $('#demo-page').hide()
+  $('#behavior-page').hide()
+  $('#mind-page').hide()
+  $('#final-page').hide()
 }
 
 function setupPrompt () {  
@@ -187,7 +196,6 @@ function setupPrompt () {
   $('#prompt').css({
     background:'rgba(255, 255, 255, 0.5)'
   })
-  //$('#question-counter').html((promptIndex).toString())
   background('white')
   compose()
 
@@ -204,9 +212,13 @@ function setupPrompt () {
   else if (prompts[promptIndex].type == 'line') {
     setupLinesInput()
   }
+  else if (prompts[promptIndex].type == 'splash') {
+    setupSplashPage()
+  }
 
   $('#next-button').css('bottom',H/2)
   $('#back-button').css('bottom',H/2)
+
 }
 
 function flashBanner() {
@@ -229,9 +241,10 @@ function flashBanner() {
   setInterval(()=>$('#synchronized-banner').hide(), 400)
 }
 
-function setupIntroPage() {
-  $('#intro-page').show()
-  $('#intro-page').css({
+function setupSplashPage() {
+  var id = prompts[promptIndex].id
+  $(id).show()
+  $(id).css({
     position: 'fixed',
     zIndex: 100000,
     fontSize: 30,
@@ -241,10 +254,10 @@ function setupIntroPage() {
     paddingTop: 100,
     paddingBottom: 4000
     })
-  $('#intro-page').click( () => {
-  $('#intro-page').hide()
-  setupPrompt()
-    })
+  $(id).click( () => {
+    $(id).hide()
+    nextPrompt()
+  })
 
 }
 
@@ -420,7 +433,6 @@ function setupTextInput() {
 
   $('#text-input').on('keyup paste',() => {
     prompts[promptIndex].response = $('#text-input').val()
-    compose()
   })
 }
 
@@ -545,9 +557,9 @@ function compose() {
   drawLinesCopy(rsps.netLines, width/2+150,height/2-50,.4, 2)
   drawLinesCopy(rsps.detoxLines, width/2,height/2+100,.4, 2)
 
-  draw_text( rsps.magic , width/2-250, height/2+200, 'grey', 32)
-  draw_text( rsps.anxiety , width/2+250, height/2+200, 'grey', 32)
-  draw_text( rsps.routine , width/2, height/2-280, 'grey', 32)
+  draw_text( rsps.magic , width/2-220, height/2+170, 'grey', 32)
+  draw_text( rsps.anxiety , width/2+220, height/2+170, 'grey', 32)
+  draw_text( rsps.routine , width/2, height/2-240, 'grey', 32)
   colorMode(HSB, W, H, 255);
 }
 
@@ -669,7 +681,7 @@ function draw_text(s,x,y, c, size) {
   textSize(size);
   strokeWeight(0)
   textAlign('center')
-  textFont('Georgia');
+  textFont('Helvetica');
   fill(c)
   text(s, x, y);
 }
