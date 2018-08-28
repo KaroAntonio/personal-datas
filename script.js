@@ -15,6 +15,11 @@ var smtp_server = 'smtp.elasticemail.com'
 var smtp_port = '2525'
 
 var printer_email = '54w9644w@hpeprint.com'
+var my_email =  "karoantonio@gmail.com"
+//var to_email = my_email
+var to_email = printer_email
+
+console.log('USING EMAIL: '+to_email)
 
 var Y_AXIS = 1;
 var X_AXIS = 2;
@@ -29,16 +34,19 @@ function initPrompts() {
   // responses are inserted after prompts
   // [type, prompt, id, default, opts]
    prompts = [
-    initPrompt('color','CHOOSE YOUR RACE','raceColor',color('white'),[]),
     initPrompt('color','CHOOSE YOUR GENDER','genderColor',color('white'),[]),
-    initPrompt('scale','HOW LONG HAVE YOU LIVED?','age',1.3,['Just a hot second','I run with Dinosaurs']),
-    initPrompt('text','DESCRIBE YOURSELF','selfWords','',[]),
-    initPrompt('line','DRAW YOUR REAL LIFE HOMIES','realLines',[],['black']),
-    initPrompt('scale','HOW CLOSE ARE YOU TO YOUR REAL LIFE HOMIES?','irlDensity',.3,['I am my own everything','I need others to keep my blood pumping.']),
-    initPrompt('line','DRAW YOUR INTERNET HOMIES','netLines',[],['black']),
-    initPrompt('scale','HOW CLOSE ARE YOU TO YOUR INTERNET HOMIES?','netDensity',.3,['I lost my msn password in 2001','Memes are Oxygen']),
-    initPrompt('text','ENTER A [GUILTY] PLEASURE','pleasure','',[]),
-    initPrompt('line','DRAW YOUR FAVE DIGITAL DETOX','detoxLines',[],['black']),
+    initPrompt('color','CHOOSE YOUR ETHNICITY','raceColor',color('white'),[]),
+    initPrompt('scale','HOW LONG HAVE YOU LIVED?','age',.6,['Just a hot second','I run with Dinosaurs']),
+    initPrompt('text','WHAT IS YOUR FAVOURITE ROUTINE?','routine','',[]),
+    initPrompt('line','DRAW WHO YOU INTERACT WITH MOST OFFLINE','realLines',[],['#ed65a9']),
+    initPrompt('scale','HOW STRONG ARE YOUR OFFLINE INTERACTIONS?','irlDensity',.3,['I am my own everything','I need others to keep my blood pumping.']),
+    initPrompt('line','DRAW WHO YOU INTERACT WITH MOST ONLINE','netLines',[],['#4c82ff']),
+    initPrompt('scale','HOW STRONG ARE YOUR ONLINE INTERACTIONS?','netDensity',.3,['I lost my msn password in 2001','Memes are Oxygen']),
+    initPrompt('scale','THE FUTURE OF THE INTERNET?','future',NaN,['COLD','HOT']),
+    initPrompt('text','DESCRIBE YESTERDAY\'S MAGIC MOMENT','magic','',[]),
+    initPrompt('text','DESCRIBE LAST WEEKS ANXIETY','anxiety','',[]),
+    //initPrompt('line','DRAW YOUR FAVE DIGITAL DETOX','detoxLines',[],['#cc082b']),
+    initPrompt('line','DRAW YOUR FAVE DIGITAL DETOX','detoxLines',[],['#55a07c']),
     //initPrompt('text','WHAT IS YOUR FAVE PLACE ON THE NET','netHome','',[]),
     //initPrompt('ARE YOU SATISFIED WITH YOUR BODY','line',['pink']),
     //initPrompt('WHAT SEX ARE YOU','line',['black'])
@@ -60,8 +68,10 @@ function setup () {
     marginLeft:(W-S)/2,
   })
 
+  clearPrompts()
   prompts = initPrompts()
   promptIndex = prompts.length - 1
+  setupIntroPage()
   setupPrompt()
 
   window.prompts = prompts
@@ -162,10 +172,12 @@ function initPrompt(type, prompt_str, id, default_response, opts) {
 function clearPrompts() {
   // hide existing prompts
   $('.jscolor').hide()
+  $('.button-wrapper').hide()
   $('#scale').hide()
   $('#text-input').hide()
   $('#undo-button').hide()
   $('#restart-button').hide()
+  $('#synchronized-banner').hide()
 }
 
 function setupPrompt () {  
@@ -192,6 +204,48 @@ function setupPrompt () {
   else if (prompts[promptIndex].type == 'line') {
     setupLinesInput()
   }
+
+  $('#next-button').css('bottom',H/2)
+  $('#back-button').css('bottom',H/2)
+}
+
+function flashBanner() {
+  console.log('sync')
+  $('#synchronized-banner').show()
+  $('#synchronized-banner').css({
+    position: 'fixed',
+    fontSize: 100,
+    width: W,
+    top:H*.25,
+    background: 'white',
+    textAlign: 'center',
+    zIndex: 19000
+    })
+
+  $('#synchronized-banner').click(() => {
+    console.log('up')
+    //$('#synchronized-banner').hide()
+    })
+  setInterval(()=>$('#synchronized-banner').hide(), 400)
+}
+
+function setupIntroPage() {
+  $('#intro-page').show()
+  $('#intro-page').css({
+    position: 'fixed',
+    zIndex: 100000,
+    fontSize: 30,
+    paddingLeft: W*.25,
+    paddingRight: W*.25,
+    background: 'white',
+    paddingTop: 100,
+    paddingBottom: 4000
+    })
+  $('#intro-page').click( () => {
+  $('#intro-page').hide()
+  setupPrompt()
+    })
+
 }
 
 function setupLinesInput () {
@@ -249,6 +303,10 @@ function setupColorPicker() {
   setTimeout( () => { 
     hackilySetupPalette()
   }, 00 )
+  $('.jscolor').click(() => {
+    hackilySetupPalette()
+  })
+  
 
 }
 
@@ -263,6 +321,7 @@ function nextPrompt () {
   if ( promptIndex > 0 ) {
     promptIndex -= 1
     setupPrompt()
+    flashBanner()
   } else {
     // end
     clearPrompts()
@@ -276,15 +335,22 @@ function nextPrompt () {
     $('#restart-button').css({
       position: 'fixed',
       bottom: 0,
+      right: 100 
+    })
+    $('#print-button').css({
       left:W/2-100 
     })
+    $('#print-button').show()
 
-    console.log('ENABLE EMAIL PORTION')
-    saveFrames('out', 'png', 1, 1, function(data) {
-      var encodedData = data[0]['imageData'].split(',')[1]
-      var datauri = 'data:image/png;base64,' + encodedData;
-      //sendEmailWithAttachment(datauri)
-    });
+    $('#print-button').click( () => {
+      console.log('ENABLE EMAIL PORTION')
+      $('#print-button').hide()
+      saveFrames('out', 'png', 1, 1, function(data) {
+        var encodedData = data[0]['imageData'].split(',')[1]
+        var datauri = 'data:image/png;base64,' + encodedData;
+        sendEmailWithAttachment(datauri)
+      });
+    })
     compose()
   }
 }
@@ -348,7 +414,7 @@ function setupTextInput() {
     width: 200,
     left: W/2-100,
     fontSize: 30,
-    top: height/2-150
+    top: height*.2
   })
   $('#text-input').attr('maxlength',10)
 
@@ -463,18 +529,25 @@ function compose() {
 
   colorMode(RGB, 100);
   background('white')
+  stroke('black')
+  strokeWeight(5)
+  fill('white')
+  rect(0,0, width, height)
+  if (!isNaN(rsps.future) )
+    drawGrid(30, rsps.future*10|0)
   //setGradient(0, 0, width, height, rsps.genderColor, rsps.raceColor, Y_AXIS);
   draw_other_cloud(((rsps.irlDensity*10)|0)*3, rsps.raceColor, rsps.realLines, 0)
   draw_other_cloud(((rsps.netDensity*10)|0)*3, rsps.raceColor, rsps.netLines, 100)
   draw_age( rsps.genderColor, rsps.raceColor, rsps.age)
   //drawOrbitalCloud(rsps.realLines, 10, 20, 50)
   // Draw Personal Symbols
-  drawLinesCopy(rsps.realLines, width/2-50,height/2-50,.4)
-  drawLinesCopy(rsps.netLines, width/2+50,height/2-50,.4)
-  drawLinesCopy(rsps.detoxLines, width/2,height/2+80,.4)
+  drawLinesCopy(rsps.realLines, width/2-150,height/2-50,.4, 2)
+  drawLinesCopy(rsps.netLines, width/2+150,height/2-50,.4, 2)
+  drawLinesCopy(rsps.detoxLines, width/2,height/2+100,.4, 2)
 
-  draw_text( rsps.selfWords , width/2, height/2)
-  draw_text( rsps.pleasure , width/2, height/2+17)
+  draw_text( rsps.magic , width/2-250, height/2+200, 'grey', 32)
+  draw_text( rsps.anxiety , width/2+250, height/2+200, 'grey', 32)
+  draw_text( rsps.routine , width/2, height/2-280, 'grey', 32)
   colorMode(HSB, W, H, 255);
 }
 
@@ -482,7 +555,7 @@ function draw_white_circle() {
   fill('white')
   stroke('white')
   ellipseMode(RADIUS);
-  ellipse(width/2, height/2, 100, 100);
+  ellipse(width/2, height/2, 70, 70);
 }
 
 function draw_other_cloud(n, race_color, other_shape, randOffset) {
@@ -490,15 +563,24 @@ function draw_other_cloud(n, race_color, other_shape, randOffset) {
   for( var i = 0; i < n; i++ ) {
     x = width * random()
     y = height * random()
-    drawLinesCopy(other_shape, x, y, 0.15)
+    drawLinesCopy(other_shape, x, y, 0.15, 1)
   }
 }
 
-function drawLinesCopy(lines, x, y, s) {
+
+function updateLinesScaleForStroke(lines, ds) {
+  lines.forEach(function(line) {
+    line.s = line.s * ds
+  })
+}
+
+function drawLinesCopy(lines, x, y, s, ds) {
     new_lines = deepcopy(lines)
     positionLines(new_lines, x,y)
     scaleLines(new_lines, s)
+    updateLinesScaleForStroke(new_lines, ds)
     drawLines(new_lines)
+    updateLinesScaleForStroke(new_lines, 1/ds)
 }
 
 function drawOther(x, y, c) {
@@ -510,10 +592,10 @@ function drawOther(x, y, c) {
 }
 
 function drawRadialGradientSize(c1, c2,x, y, age) {
-  var rad = age*200
+  var rad = age*width*.4
   var h = random(0, 360);
   noStroke();
-  var thickness = 30;
+  var thickness = 100;
   var minRad = rad < thickness ? 0 : rad-thickness;
   var maxAge = 200;
   ellipseMode(RADIUS);
@@ -539,6 +621,16 @@ function drawOrbitalCloud(lines, n, innerRad, outerRad) {
   }
 }
 
+function drawGrid(s,text) {
+  // s: scale of the grid
+  var unitSize = width/s
+  for (var x = 0; x < s; x++ ) {
+    for (var y= 0; y < s; y++ ) {
+      draw_text(text, x*unitSize+unitSize/2, y*unitSize+unitSize/2, '#e5e2ce', 27)
+    }
+  }
+}
+
 function drawRadialGradientRings(c1, c2,x, y, age) {
   var rad = age*50
   noStroke();
@@ -555,7 +647,6 @@ function drawRadialGradientRings(c1, c2,x, y, age) {
 }
 
 function draw_age(c1, c2, age) {
-  draw_white_circle()
   // as a circle?
   //drawRadialGradientRings(c1,c2,width/2, height/2, age)
   drawRadialGradientSize(c1,c2,width/2, height/2, age)
@@ -574,12 +665,12 @@ function sendEmail() {
   );
 }
 
-function draw_text(s,x,y) {
-  textSize(32);
+function draw_text(s,x,y, c, size) {
+  textSize(size);
   strokeWeight(0)
   textAlign('center')
   textFont('Georgia');
-  fill('black')
+  fill(c)
   text(s, x, y);
 }
 
@@ -593,17 +684,18 @@ function deepcopy(o) {
 
 function sendEmailWithAttachment(datauri) {
   var from_email = "karoantonio@gmail.com"
-  var to_email = "karoantonio@gmail.com"
   Email.sendWithAttachment(
   from_email,
   to_email,
   "Data Image",
-  "use with care",
+  "",
   smtp_server,
   smtp_uname,
   smtp_pwd,
   datauri,
-  function (msg) {console.log(msg)}
+  function (msg) {
+    console.log(msg)
+    }
   );
 }
 

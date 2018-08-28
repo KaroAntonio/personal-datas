@@ -6,11 +6,16 @@
     <link rel="stylesheet" href="style.css">
     <script src="libs/jquery-1.9.0.js"></script>
   </head>
-  <body>
+  <body onselectstart='return false;'>
 	  <img id='loading' src='assets/loading.gif'>
       <div id='prompt'>PROMPT</div>
+      <div id='synchronized-banner'>
+      DATA
+      <br>
+      CORRECT
+      </div>
       <div id='back-button' onselectstart='return false;'>
-        <div class='big-button'>BACK</div>
+        <div class='big-button'>UNSYNC</div>
       </div>
       <div id='undo-button' onselectstart='return false;'>
         <div class='big-button'>UNDO</div>
@@ -18,12 +23,23 @@
       <div id='restart-button' onselectstart='return false;'>
         <div class='big-button'>RESTART</div>
       </div>
+      <div id='print-button' class='button-wrapper' onselectstart='return false;'>
+        <div class='big-button'>PRINT</div>
       </div>
       <div id='next-button' onselectstart='return false;'>
-        <div class='big-button'>NEXT</div>
+        <div class='big-button'>SYNC</div>
           <div id='counter-label'> 
             <div id='question-counter'></div>
         </div>
+      </div>
+      <div id='intro-page'>
+      Welcome to your Personal Data Terminal!
+  <br>
+  <br>
+Through this terminal, you gain access and can manage any personal data that has ever been extracted from you. To log into your account, please complete the following authentication process. You will be asked to verify some of your data. We will check if your entries match your database in our system.
+  <br>
+  <br>
+NEXT
       </div>
         <button id='color-picker' class="jscolor {onFineChange:'updateColor(this)', width:300, height:300, top:100, position:'fixed', left: -100}">CLICK</button>
         <input type="text" name="fname" id='text-input'></input>
