@@ -8,6 +8,8 @@ var isColor = true;
 
 var myFont;
 
+var initializedSplashes = {}
+
 var randomSeedVal = Math.random()*100
 var sendgridApiKey = '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'
 var smtpjsToken = 'd48c379c-c7f6-4c20-9f95-a906e005e9d7'
@@ -288,11 +290,15 @@ function setupSplashPage() {
     paddingTop: 100,
     paddingBottom: 4000
     })
-  $(id).click( () => {
-    $(id).hide()
-    nextPrompt()
-  })
-
+ 
+  console.log(initializedSplashes) 
+  if (!(id in initializedSplashes)) {
+    initializedSplashes[id] = null
+    $(id).click( () => {
+      $(id).hide()
+      nextPrompt()
+    })
+  }
 }
 
 function setupLinesInput () {
