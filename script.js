@@ -582,9 +582,9 @@ function compose() {
   drawLinesCopy(rsps.netLines, width/2+150,height/2-50,.4, 2)
   drawLinesCopy(rsps.detoxLines, width/2,height/2+100,.4, 2)
 
-  draw_text( rsps.future , width/2, height/2+30, 'grey', 32)
+  draw_text( rsps.future , width/2, height/2+50, 'grey', 32)
   draw_text( rsps.anxiety , width/2, height/2, 'grey', 32)
-  draw_text( rsps.routine , width/2, height/2-30, 'grey', 32)
+  draw_text( rsps.routine , width/2, height/2-50, 'grey', 32)
   colorMode(HSB, W, H, 255);
 }
 
