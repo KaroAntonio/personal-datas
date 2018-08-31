@@ -1,8 +1,15 @@
+@font-face {
+    font-family: Favorit;
+    src: url("assets/Favorit_Regular.otf") format("opentype");
+}
+
 body,html { 
+  font-family: Favorit;
   margin: 0px; 
   overflow: hidden;
   border: 0px; 
 }
+
 
 * {
   cursor: pointer;

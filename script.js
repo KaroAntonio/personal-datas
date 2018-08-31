@@ -6,6 +6,8 @@ var isMouseDown = false;
 
 var isColor = true;
 
+var myFont;
+
 var randomSeedVal = Math.random()*100
 var sendgridApiKey = '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'
 var smtpjsToken = 'd48c379c-c7f6-4c20-9f95-a906e005e9d7'
@@ -74,6 +76,8 @@ function setup () {
   $(ctx.elt).css({
     marginLeft:(W-S)/2,
   })
+
+  myFont = loadFont("assets/Favorit_Regular.otf");
 
   clearPrompts()
   prompts = initPrompts()
@@ -702,7 +706,7 @@ function draw_text(s,x,y, c, size) {
   textSize(size);
   strokeWeight(0)
   textAlign('center')
-  textFont('Helvetica');
+  textFont(myFont);
   fill(c)
   text(s, x, y);
 }
