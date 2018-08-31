@@ -132,6 +132,16 @@ function setup () {
   $('#print-button').click( () => {
     console.log('ENABLE EMAIL PORTION')
     $('#print-button').hide()
+    $('#end-instructions').show()
+    $('#end-instructions').css({
+      top: H*.2,
+      fontSize: 40,
+      zIndex: 10000,
+      position: 'fixed',
+      paddingLeft: W*.2,
+      paddingRight: W*.2,
+      background: 'transparent'
+    })
     saveFrames('out', 'png', 1, 1, function(data) {
       var encodedData = data[0]['imageData'].split(',')[1]
       var datauri = 'data:image/png;base64,' + encodedData;
@@ -210,6 +220,7 @@ function clearPrompts() {
   $('#color-button').hide()
   $('#synchronized-banner').hide()
 
+  $('#end-instructions').hide()
   $('#intro-page').hide()
   $('#demo-page').hide()
   $('#behavior-page').hide()
