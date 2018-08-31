@@ -89,6 +89,17 @@ body,html {
   z-index: 20;
 }
 
+#color-button {
+  position: fixed;
+  width: 200px;
+  right: 0px;
+  bottom: 0px;
+  padding-bottom: 10px;
+  padding-right: 10px;
+  text-align: right;
+  z-index: 20;
+}
+
 #restart-button {
   position: fixed;
   width: 200px;
@@ -96,7 +107,7 @@ body,html {
   bottom: 0px;
   padding-bottom: 10px;
   padding-right: 10px;
-  text-align: right;
+  text-align: left;
   z-index: 20;
 }
 

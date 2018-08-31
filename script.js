@@ -4,6 +4,8 @@ var S = W > H ? H : W
 var left_offset; 
 var isMouseDown = false;
 
+var isColor = true;
+
 var randomSeedVal = Math.random()*100
 var sendgridApiKey = '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'
 var smtpjsToken = 'd48c379c-c7f6-4c20-9f95-a906e005e9d7'
@@ -40,16 +42,17 @@ function initPrompts() {
     initPrompt('color','CHOOSE YOUR ETHNICITY','raceColor',color('white'),[]),
     initPrompt('scale','HOW LONG HAVE YOU LIVED?','age',.8,['Just a hot second','I run with Dinosaurs']),
     initPrompt('splash','SPLASH','#behavior-page','',[]),
-    initPrompt('text','WHAT IS YOUR FAVOURITE ROUTINE?','routine','',[]),
+    initPrompt('text','WHAT IS YOUR MOST IMPORTANT HABIT?','routine','',[]),
     initPrompt('line','DRAW WHO YOU INTERACT WITH MOST OFFLINE','realLines',[],['#ed65a9']),
-    initPrompt('scale','HOW STRONG ARE YOUR OFFLINE INTERACTIONS?','irlDensity',.3,['I am my own everything','I need others to keep my blood pumping.']),
+    initPrompt('scale','HOW FREQUENT ARE YOUR OFFLINE INTERACTIONS?','irlDensity',.3,['I am my own everything','I need others to keep my blood pumping.']),
     initPrompt('line','DRAW WHO YOU INTERACT WITH MOST ONLINE','netLines',[],['#4c82ff']),
-    initPrompt('scale','HOW STRONG ARE YOUR ONLINE INTERACTIONS?','netDensity',.3,['I lost my msn password in 2001','Memes are Oxygen']),
+    initPrompt('scale','HOW FREQUENT ARE YOUR ONLINE INTERACTIONS?','netDensity',.3,['I lost my msn password in 2001','Memes are Oxygen']),
     initPrompt('splash','SPLASH','#mind-page','',[]),
-    initPrompt('scale','THE FUTURE OF THE INTERNET?','future',NaN,['COLD','HOT']),
-    initPrompt('text','DESCRIBE YESTERDAY\'S MAGIC MOMENT','magic','',[]),
-    initPrompt('text','DESCRIBE LAST WEEKS ANXIETY','anxiety','',[]),
+    //initPrompt('scale','THE FUTURE OF THE INTERNET?','future',NaN,['COLD','HOT']),
+    //initPrompt('text','DESCRIBE YESTERDAY\'S MAGIC MOMENT','magic','',[]),
+    initPrompt('text','YOUR BIGGEST TECH ANXIETY','anxiety','',[]),
     initPrompt('line','DRAW YOUR FAVE DIGITAL DETOX','detoxLines',[],['#55a07c']),
+    initPrompt('text','THE FUTURE OF THE INTERNET IS...','future','',[]),
     initPrompt('splash','SPLASH','#final-page','',[]),
     //initPrompt('text','WHAT IS YOUR FAVE PLACE ON THE NET','netHome','',[]),
     //initPrompt('ARE YOU SATISFIED WITH YOUR BODY','line',['pink']),
@@ -109,9 +112,29 @@ function setup () {
     }
   })
 
-  $('#next-button').click(function (evt) {
-    nextPrompt()
-  }) 
+  isColor = true;
+
+  $('#next-button').mousedown(() => {
+    $('#synchronized-banner').show()
+  })
+  $('body').mouseup( () => {
+    if($('#synchronized-banner').is(':visible') ) {
+      $('#synchronized-banner').hide()
+      nextPrompt()
+    }
+  })
+  $('#color-button').click(toggleColorMode)
+
+  $('#print-button').click( () => {
+    console.log('ENABLE EMAIL PORTION')
+    $('#print-button').hide()
+    saveFrames('out', 'png', 1, 1, function(data) {
+      var encodedData = data[0]['imageData'].split(',')[1]
+      var datauri = 'data:image/png;base64,' + encodedData;
+      sendEmailWithAttachment(datauri, to_email)
+      sendEmailWithAttachment(datauri, my_email)
+    });
+  })
   $('#back-button').click(function (evt) {
     if (promptIndex < prompts.length-1)
       prevPrompt()
@@ -180,6 +203,7 @@ function clearPrompts() {
   $('#text-input').hide()
   $('#undo-button').hide()
   $('#restart-button').hide()
+  $('#color-button').hide()
   $('#synchronized-banner').hide()
 
   $('#intro-page').hide()
@@ -223,7 +247,6 @@ function setupPrompt () {
 
 function flashBanner() {
   console.log('sync')
-  $('#synchronized-banner').show()
   $('#synchronized-banner').css({
     position: 'fixed',
     fontSize: 100,
@@ -234,11 +257,7 @@ function flashBanner() {
     zIndex: 19000
     })
 
-  $('#synchronized-banner').click(() => {
-    console.log('up')
-    //$('#synchronized-banner').hide()
-    })
-  setInterval(()=>$('#synchronized-banner').hide(), 400)
+  //setInterval(()=>$('#synchronized-banner').hide(), 400)
 }
 
 function setupSplashPage() {
@@ -264,7 +283,6 @@ function setupSplashPage() {
 function setupLinesInput () {
 
     lines = prompts[promptIndex].response 
-    if (!lines) prompts[promptIndex].response = []
     $('#undo-button').show()
     $('#undo-button').css({
       left:W/2-100 
@@ -345,7 +363,12 @@ function nextPrompt () {
     $('#prompt').html('BEHOLD UR DATAS')
     $('#back-button').hide()
     $('#restart-button').show()
+    $('#color-button').show()
     $('#restart-button').css({
+      position: 'fixed',
+      bottom: 0
+    })
+    $('#color-button').css({
       position: 'fixed',
       bottom: 0,
       right: 100 
@@ -355,17 +378,13 @@ function nextPrompt () {
     })
     $('#print-button').show()
 
-    $('#print-button').click( () => {
-      console.log('ENABLE EMAIL PORTION')
-      $('#print-button').hide()
-      saveFrames('out', 'png', 1, 1, function(data) {
-        var encodedData = data[0]['imageData'].split(',')[1]
-        var datauri = 'data:image/png;base64,' + encodedData;
-        sendEmailWithAttachment(datauri)
-      });
-    })
     compose()
   }
+}
+
+function toggleColorMode() {
+  isColor = !isColor
+  compose()
 }
 
 function drawLines( lines ) {
@@ -380,15 +399,17 @@ function drawLine ( lineData , style='points') {
 }
 
 function drawPointsLine( lineData ) {
-  fill(line.color)
+  if (isColor) fill(line.color)
+  else fill('black')
+
   lineData.points.forEach((pt) => {
     ellipse(pt[0], pt[1], 10, 10)
   })
 }
 
 function drawSolidLine( lineData ) {
-  fill(lineData.color)
-  stroke(lineData.color)
+  if (isColor) stroke(lineData.color)
+  else stroke('black')
   strokeWeight(5*lineData.s)
   for ( var i = 0; i < lineData.points.length-1; i++) {
     var p1 = lineData.points[i]
@@ -424,12 +445,12 @@ function setupTextInput() {
   $('#text-input').val(prompts[promptIndex].response)
   $('#text-input').css({
     position:'fixed',
-    width: 200,
-    left: W/2-100,
+    width: 300,
+    left: W/2-150,
     fontSize: 30,
     top: height*.2
   })
-  $('#text-input').attr('maxlength',10)
+  $('#text-input').attr('maxlength',15)
 
   $('#text-input').on('keyup paste',() => {
     prompts[promptIndex].response = $('#text-input').val()
@@ -545,21 +566,21 @@ function compose() {
   strokeWeight(5)
   fill('white')
   rect(0,0, width, height)
-  if (!isNaN(rsps.future) )
-    drawGrid(30, rsps.future*10|0)
+  //if ( !isNaN(rsps.future) )
+    //drawGrid(30, rsps.future*10|0)
   //setGradient(0, 0, width, height, rsps.genderColor, rsps.raceColor, Y_AXIS);
   draw_other_cloud(((rsps.irlDensity*10)|0)*3, rsps.raceColor, rsps.realLines, 0)
   draw_other_cloud(((rsps.netDensity*10)|0)*3, rsps.raceColor, rsps.netLines, 100)
   draw_age( rsps.genderColor, rsps.raceColor, rsps.age)
-  //drawOrbitalCloud(rsps.realLines, 10, 20, 50)
+  // drawOrbitalCloud(rsps.realLines, 10, 20, 50)
   // Draw Personal Symbols
   drawLinesCopy(rsps.realLines, width/2-150,height/2-50,.4, 2)
   drawLinesCopy(rsps.netLines, width/2+150,height/2-50,.4, 2)
   drawLinesCopy(rsps.detoxLines, width/2,height/2+100,.4, 2)
 
-  draw_text( rsps.magic , width/2-220, height/2+170, 'grey', 32)
-  draw_text( rsps.anxiety , width/2+220, height/2+170, 'grey', 32)
-  draw_text( rsps.routine , width/2, height/2-240, 'grey', 32)
+  draw_text( rsps.future , width/2, height/2+30, 'grey', 32)
+  draw_text( rsps.anxiety , width/2, height/2, 'grey', 32)
+  draw_text( rsps.routine , width/2, height/2-30, 'grey', 32)
   colorMode(HSB, W, H, 255);
 }
 
@@ -694,7 +715,7 @@ function deepcopy(o) {
   return JSON.parse(JSON.stringify(o))
 }
 
-function sendEmailWithAttachment(datauri) {
+function sendEmailWithAttachment(datauri, to_email) {
   var from_email = "karoantonio@gmail.com"
   Email.sendWithAttachment(
   from_email,
