@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>DATA</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="libs/jquery-1.9.0.js"></script>
+  </head>
+  <body onselectstart='return false;' scroll="no">
+	  <img id='loading' src='assets/loading.gif'>
+      <div id='prompt'>PROMPT</div>
+      <div id='synchronized-banner'>
+      DATA
+      <br>
+      CORRECT
+      </div>
+      <div id='back-button' onselectstart='return false;'>
+        <div class='big-button'>UNSYNC</div>
+      </div>
+      <div id='undo-button' onselectstart='return false;'>
+        <div class='big-button'>UNDO</div>
+      </div>
+      <div id='restart-button' onselectstart='return false;'>
+        <div class='big-button'>RESTART</div>
+      </div>
+      <div id='color-button' onselectstart='return false;'>
+        <div class='big-button'>COLOR</div>
+      </div>
+      <div id='print-button' class='button-wrapper' onselectstart='return false;'>
+        <div class='big-button'>PRINT</div>
+      </div>
+      <div id='next-button' onselectstart='return false;'>
+        <div class='big-button'>SYNC</div>
+          <div id='counter-label'> 
+            <div id='question-counter'></div>
+        </div>
+      </div>
+      <div id='intro-page'>
+      Welcome to your Personal Data Terminal!
+  <br>
+  <br>
+Through this terminal, you gain access and can manage any personal data that has ever been extracted from you. To log into your account, please complete the following authentication process. You will be asked to verify some of your data. We will check if your entries match your database in our system.
+  <br>
+  <br>
+NEXT
+      </div>
+      <div id='demo-page'>
+    Please authenticate your demographic data. <br><br>This section verifies information collected about your personal characteristics. Please answer the following questions about yourself. To proceed, please click “next”.
+      </div>
+      <div id='behavior-page'>
+      Please authenticate your behavioural data.<br><br> This section verifies information produced as a result of your actions, using a range of smart devices connected to the Internet. Please answer the following questions about your recent behavior. To proceed, please click “next”.
+      </div>
+      <div id='mind-page'>
+      Please authenticate your mind data. <br><br> This section verifies information about your attitudes, values and beliefs algorithmically inferred from your personal data.
+
+To finalize the authentication, please synchronize some of your held beliefs and opinions with our database. To proceed, please click “next”.
+      </div>
+      <div id='final-page'>
+      Congratulations, you have now completed the authentication process. <br><br>You have now gained access to, as well as full control over the entirety of your personal data. With this power comes a responsibility: You need to decide how to use your data, which actors to share it with or provide it to, and ultimately, which kind of future you would like to help come into existence with the support of your data. 
+      </div>
+      <div id='end-instructions'>
+      Your Data will print out shortly. Please cut/tear out and attach to wall to indicate your choice to commit it to the public space. 
+      </div>
+        <button id='color-picker' class="jscolor {onFineChange:'updateColor(this)', width:200, height:200, top:100, position:'fixed', left: -100}">CLICK</button>
+        <input type="text" name="fname" id='text-input'></input>
+        <div id='scale'>
+          <div id='scale-bar'></div>
+          <div id='scale-start'></div>
+          <div id='scale-end'></div>
+          <div id='scale-lo-label'></div>
+          <div id='scale-hi-label'></div>
+          <div id='scale-slider'></div>
+      </div>
+  </body>
+
+<!-- top button -->
+<!--<script src="https://cdn.rawgit.com/KaroAntonio/net-template/master/js/universal-home.js"></script>-->
+<script src="libs/jquery-1.9.0.js"></script>
+<!--<script src="js/universal-home.js"></script>-->
+<script src="js/random_utils.js"></script>
+<script src="libs/p5.min.js"></script>
+<script src="libs/jscolor.js"></script>
+<script src="https://smtpjs.com/v2/smtp.js"></script>
+<script src="script.js"></script>
+</html>

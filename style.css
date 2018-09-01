@@ -1,0 +1,140 @@
+@font-face {
+    font-family: Favorit;
+    src: url("assets/Favorit_Regular.otf") format("opentype");
+}
+
+body,html { 
+  font-family: Favorit;
+  margin: 0px; 
+  overflow: hidden;
+  border: 0px; 
+  height:100%;
+  width: 100%;
+}
+
+
+* {
+  cursor: pointer;
+}
+
+#loading {
+  position: absolute;
+  right: 50vw;
+  top: 20vh;
+  width: 40px;
+  height: 40px;
+  z-index: 1000000; /* the highest */
+}
+
+#prompt {
+  position: fixed; 
+  width: 100vw;
+  font-size: 30px;
+  padding-top: 10px;
+  text-align: center;
+}
+
+#next-button {
+  position: fixed;
+  width: 200px;
+  right: 0px;
+  bottom: 200px;
+  padding-right: 10px;
+  text-align: right;
+  z-index: 20;
+
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+#back-button {
+  position: fixed;
+  width: 200px;
+  left: 0px;
+  padding-bottom: 10px;
+  padding-right: 10px;
+  text-align: right;
+  z-index: 20;
+
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+#undo-button {
+  position: fixed;
+  width: 200px;
+  left: 0px;
+  bottom: 0px;
+  padding-bottom: 10px;
+  padding-right: 10px;
+  text-align: right;
+  z-index: 20;
+
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.button-wrapper {
+  position: fixed;
+  width: 200px;
+  left: 0px;
+  bottom: 0px;
+  padding-bottom: 10px;
+  padding-right: 10px;
+  bottom: 0px;
+  text-align: right;
+  z-index: 20;
+}
+
+#color-button {
+  position: fixed;
+  width: 200px;
+  right: 0px;
+  bottom: 0px;
+  padding-bottom: 10px;
+  padding-right: 10px;
+  text-align: right;
+  z-index: 20;
+}
+
+#restart-button {
+  position: fixed;
+  width: 200px;
+  left: 0px;
+  bottom: 0px;
+  padding-bottom: 10px;
+  padding-right: 10px;
+  text-align: left;
+  z-index: 20;
+}
+
+#next-button:hover {
+  cursor: pointer;
+}
+
+#question-counter {
+}
+
+#counter-label {
+  float: right;
+  display: inline-block;
+}
+
+.big-button {
+  font-size: 50px;
+}
+
+
+
